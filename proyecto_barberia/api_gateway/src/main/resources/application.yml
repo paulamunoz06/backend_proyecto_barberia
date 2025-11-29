@@ -1,0 +1,48 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: false
+      routes:
+
+        # RUTAS PÚBLICAS
+        - id: identidad-acceso-public
+          uri: http://identidad-acceso-service:5001
+          predicates:
+            - Path=/api/auth/**, /api/usuario/cliente, /api/usuario/cliente/**
+
+        # RUTAS PROTEGIDAS (catálogo horario)
+        - id: catalogo-horario-service
+          uri: http://catalogo-horario-service:5000
+          predicates:
+            - Path=/api/asignar,
+              /api/barbero, /api/barbero/**,
+              /api/franja, /api/franja/**,
+              /api/horario, /api/horario/**,
+              /api/categoria, /api/categoria/**,
+              /api/servicio, /api/servicio/**
+          filters:
+            - JwtRelay
+
+        # RUTAS PROTEGIDAS (identidad)
+        - id: identidad-acceso-protected
+          uri: http://identidad-acceso-service:5001
+          predicates:
+            - Path=/api/usuario/barbero, /api/usuario/barbero/**
+          filters:
+            - JwtRelay
+
+  main:
+    web-application-type: reactive
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    com.empresa.gateway: DEBUG
+    root: INFO

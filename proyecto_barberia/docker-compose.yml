@@ -1,0 +1,154 @@
+version: "3.9"
+
+services:
+  # ----------------------------
+  # API Gateway
+  # ----------------------------
+  api-gateway:
+    build: api_gateway
+    container_name: api-gateway
+    depends_on:
+      - identidad-acceso-service
+      - catalogo-horario-service
+    environment:
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: admin
+      SPRING_RABBITMQ_PASSWORD: admin
+      SERVER_PORT: 8080
+    ports:
+      - "8080:8080"
+
+  # ----------------------------
+  # Base de datos PostgreSQL
+  # ----------------------------
+  catalogo-horario-db:
+    image: postgres:15
+    container_name: catalogo-horario-db
+    environment:
+      POSTGRES_DB: catalogo-horario-database
+      POSTGRES_USER: app_user
+      POSTGRES_PASSWORD: ingesis
+    ports:
+      - "15432:5432"
+    volumes:
+      - catalogo-data:/var/lib/postgresql/data
+
+  identidad-acceso-db:
+    image: postgres:15
+    container_name: identidad-acceso-db
+    environment:
+      POSTGRES_DB: identidad-acceso-database
+      POSTGRES_USER: app_user
+      POSTGRES_PASSWORD: ingesis
+    ports:
+      - "25432:5432"
+    volumes:
+      - identidad-acceso-data:/var/lib/postgresql/data
+
+  turnos-reservas-db:
+    image: postgres:15
+    container_name: turnos-reservas-db
+    environment:
+      POSTGRES_DB: turnos-reservas-database
+      POSTGRES_USER: app_user
+      POSTGRES_PASSWORD: ingesis
+    ports:
+      - "35432:5432"
+    volumes:
+      - turnos-reservas-data:/var/lib/postgresql/data
+
+  # ----------------------------
+  # RabbitMQ
+  # ----------------------------
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"        # Puerto AMQP
+      - "15672:15672"      # UI web
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+
+  # ----------------------------
+  # Microservicio catálogo horario
+  # ----------------------------
+  catalogo-horario-service:
+    build: ./microservicio_catalogo_horario
+    container_name: catalogo-horario-service
+    depends_on:
+      - catalogo-horario-db
+      - rabbitmq
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://catalogo-horario-db:5432/catalogo-horario-database
+      SPRING_DATASOURCE_USERNAME: app_user
+      SPRING_DATASOURCE_PASSWORD: ingesis
+      SPRING_JPA_HIBERNATE_DDL_AUTO: none
+
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: admin
+      SPRING_RABBITMQ_PASSWORD: admin
+
+      SERVER_PORT: 5000
+    ports:
+      - "5000:5000"
+
+  # ----------------------------
+  # Microservicio identidad acceso
+  # ----------------------------
+  identidad-acceso-service:
+    build: ./microservicio_identidad_acceso
+    container_name: identidad-acceso-service
+    depends_on:
+      - identidad-acceso-db
+      - rabbitmq
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://identidad-acceso-db:5432/identidad-acceso-database
+      SPRING_DATASOURCE_USERNAME: app_user
+      SPRING_DATASOURCE_PASSWORD: ingesis
+      SPRING_JPA_HIBERNATE_DDL_AUTO: none
+
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: admin
+      SPRING_RABBITMQ_PASSWORD: admin
+
+      SERVER_PORT: 5001
+    ports:
+      - "5001:5001"
+
+  # ----------------------------
+  # Microservicio catálogo horario
+  # ----------------------------
+  turnos-reservas-service:
+    build: ./microservicio_turnos_reservas
+    container_name: turnos-reservas-service
+    depends_on:
+      - turnos-reservas-db
+      - rabbitmq
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://turnos-reservas-db:5432/turnos-reservas-database
+      SPRING_DATASOURCE_USERNAME: app_user
+      SPRING_DATASOURCE_PASSWORD: ingesis
+      SPRING_JPA_HIBERNATE_DDL_AUTO: none
+
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: admin
+      SPRING_RABBITMQ_PASSWORD: admin
+
+      SERVER_PORT: 5002
+    ports:
+      - "5002:5002"
+# ----------------------------
+# Volúmenes persistentes
+# ----------------------------
+volumes:
+  catalogo-data:
+  rabbitmq-data:
+  identidad-acceso-data:
+  turnos-reservas-data:
