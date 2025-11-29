@@ -8,15 +8,10 @@ import java.time.LocalTime;
 
 @Getter
 @Setter
-public class TurnoDTORespuesta {
-    private Integer id;
-    private Integer reserva;
+public class TurnoDTOPeticionBarbero {
     private String cliente;
     private Integer servicioId;
     private String barberoId;
     private Integer estado;
     private String descripcion;
-    private LocalDate fechaInicio;
-    private LocalTime HoraInicio;
-    private LocalTime HoraFin;
 }

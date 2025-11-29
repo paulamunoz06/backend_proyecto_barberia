@@ -181,7 +181,6 @@ public class ServicioServiceImpl implements IServicioService {
         dto.setDuracion(s.getDuracion());
         dto.setPrecio(s.getPrecio());
         dto.setPreparacion(s.getPreparacion());
-        dto.setAdministradorId(s.getAdministrador().getId());
         dto.setCategoriaId(s.getCategoria().getId());
         return dto;
     }

@@ -1,6 +1,7 @@
 package co.edu.unicauca.microservicio_turnos_reservas.Turnos.controladores;
 
 import co.edu.unicauca.microservicio_turnos_reservas.Turnos.fachada.DTOs.TurnoDTOPeticion;
+import co.edu.unicauca.microservicio_turnos_reservas.Turnos.fachada.DTOs.TurnoDTOPeticionBarbero;
 import co.edu.unicauca.microservicio_turnos_reservas.Turnos.fachada.DTOs.TurnoDTORespuesta;
 import co.edu.unicauca.microservicio_turnos_reservas.Turnos.fachada.servicios.ITurnoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,8 +46,13 @@ public class TurnoRESTController {
         return ResponseEntity.ok(service.save(servicio));
     }
 
+    @PostMapping("/barbero/")
+    public ResponseEntity<TurnoDTORespuesta> crearPorBarbero(@RequestBody TurnoDTOPeticionBarbero servicio) {
+        return ResponseEntity.ok(service.saveBarbero(servicio));
+    }
+
     @PutMapping("/{id}")
-    public ResponseEntity<TurnoDTORespuesta> actualizar(@PathVariable Integer id, @RequestBody TurnoDTOPeticion servicio) {
+    public ResponseEntity<TurnoDTORespuesta> actualizar(@PathVariable Integer id, @RequestBody TurnoDTORespuesta servicio) {
         return ResponseEntity.ok(service.update(id, servicio));
     }
 

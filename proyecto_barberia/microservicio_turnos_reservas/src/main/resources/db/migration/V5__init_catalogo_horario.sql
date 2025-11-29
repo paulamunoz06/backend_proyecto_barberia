@@ -29,17 +29,9 @@ CREATE TABLE turno (
     barbero_id VARCHAR(20) NOT NULL,
     estado_id INT NOT NULL,
     turno_descripcion CHAR(50) NOT NULL,
-    turno_hora_inicio TIME NOT NULL,
+    turno_hora_inicio TIME NULL,
     turno_hora_fin TIME NULL,
-    turno_fecha_inicio DATE NOT NULL,
-    @Column(name = "turno_fecha_inicio", nullable = false)
-    private LocalTime fechaInicio;
-
-@Column(name = "turno_hora_inicio", nullable = false)
-    private LocalTime HoraInicio;
-
-@Column(name = "turno_hora_fin", nullable = true)
-    private LocalTime HoraFin;
+    turno_fecha DATE NOT NULL,
 
     CONSTRAINT fk_turno_reserva FOREIGN KEY (reserva_id) REFERENCES reserva(reserva_id),
     CONSTRAINT fk_turno_cliente FOREIGN KEY (cliente_id) REFERENCES cliente(cliente_id),

@@ -9,6 +9,7 @@ import co.edu.unicauca.microservicio_turnos_reservas.Turnos.accesoADatos.EstadoR
 import co.edu.unicauca.microservicio_turnos_reservas.Reservas.accesoADatos.ReservaRepository;
 import co.edu.unicauca.microservicio_turnos_reservas.Turnos.accesoADatos.TurnoRepository;
 import co.edu.unicauca.microservicio_turnos_reservas.Turnos.fachada.DTOs.TurnoDTOPeticion;
+import co.edu.unicauca.microservicio_turnos_reservas.Turnos.fachada.DTOs.TurnoDTOPeticionBarbero;
 import co.edu.unicauca.microservicio_turnos_reservas.Turnos.fachada.DTOs.TurnoDTORespuesta;
 import co.edu.unicauca.microservicio_turnos_reservas.Turnos.modelos.Estado;
 import co.edu.unicauca.microservicio_turnos_reservas.Turnos.modelos.Turno;
@@ -16,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -35,6 +37,9 @@ public class TurnoServiceImpl implements ITurnoService {
 
     @Autowired
     private CatalogoServiceClient catalogoServiceClient;
+
+    @Autowired
+    private TurnoDinamico turnoDinamico;
 
     @Override
     public List<TurnoDTORespuesta> findAll() {
@@ -88,7 +93,7 @@ public class TurnoServiceImpl implements ITurnoService {
 
     @Override
     public TurnoDTORespuesta save(TurnoDTOPeticion turnoDTO) {
-        validarFechaReserva(turnoDTO.getFechaReserva());
+        validarFechaReserva(turnoDTO.getFechaInicio());
 
         Cliente cliente = repoCliente.findById(turnoDTO.getCliente()).orElseThrow(() -> new EntidadNoExisteException("Cliente no encontrado con ID: " + turnoDTO.getCliente()));
         Estado estado = repoEstado.findById(turnoDTO.getEstado()).orElseThrow(() -> new EntidadNoExisteException("Estado no encontrado con ID: " + turnoDTO.getEstado()));
@@ -114,9 +119,29 @@ public class TurnoServiceImpl implements ITurnoService {
     }
 
     @Override
+    public TurnoDTORespuesta saveBarbero(TurnoDTOPeticionBarbero turnoDTO) {
+        Cliente cliente = repoCliente.findById(turnoDTO.getCliente()).orElseThrow(() -> new EntidadNoExisteException("Cliente no encontrado con ID: " + turnoDTO.getCliente()));
+        Estado estado = repoEstado.findById(turnoDTO.getEstado()).orElseThrow(() -> new EntidadNoExisteException("Estado no encontrado con ID: " + turnoDTO.getEstado()));
+
+        if (!catalogoServiceClient.validarBarbero(turnoDTO.getBarberoId())) {
+            throw new EntidadNoExisteException("Barbero no encontrado con ID: " + turnoDTO.getBarberoId());
+        }
+        if (!catalogoServiceClient.validarServicio(turnoDTO.getServicioId())) {
+            throw new EntidadNoExisteException("Servicio no encontrado con ID: " + turnoDTO.getServicioId());
+        }
+        Turno turno = mapearAPersistenciaBarbero(turnoDTO);
+        turno.setCliente(cliente);
+        turno.setEstado(estado);
+        turno.setHoraInicio(encontrarHora(mapearARespuesta(turno)));
+
+        Turno turnoGuardado = turnoRepository.save(turno);
+
+        return mapearARespuesta(turnoGuardado);
+    }
+
+    @Override
     public TurnoDTORespuesta update(Integer id, TurnoDTORespuesta turnoDTO) {
         validarFechaReserva(turnoDTO.getFechaInicio());
-        validarFechaReserva(turnoDTO.getFechaFin());
         Turno turnoExistente = turnoRepository.findById(id).orElseThrow(() -> new EntidadNoExisteException("Turno no encontrado con ID: " + id));
         Cliente cliente = repoCliente.findById(turnoDTO.getCliente()).orElseThrow(() -> new EntidadNoExisteException("Cliente no encontrado con ID: " + turnoDTO.getCliente()));
         Estado estado = repoEstado.findById(turnoDTO.getEstado()).orElseThrow(() -> new EntidadNoExisteException("Estado no encontrado con ID: " + turnoDTO.getEstado()));
@@ -135,11 +160,16 @@ public class TurnoServiceImpl implements ITurnoService {
         turnoExistente.setEstado(estado);
         turnoExistente.setDescripcion(turnoDTO.getDescripcion());
         turnoExistente.setFechaInicio(turnoDTO.getFechaInicio());
-        turnoExistente.setFechaFin(turnoDTO.getFechaFin());
+        turnoExistente.setHoraInicio(encontrarHora(turnoDTO));
 
         Turno turnoActualizado = turnoRepository.save(turnoExistente);
         return mapearARespuesta(turnoActualizado);
 
+    }
+
+    @Override
+    public LocalTime encontrarHora(TurnoDTORespuesta turno) {
+        return null;
     }
 
     @Override
@@ -159,7 +189,8 @@ public class TurnoServiceImpl implements ITurnoService {
         dto.setEstado(t.getEstado().getId());
         dto.setDescripcion(t.getDescripcion());
         dto.setFechaInicio(t.getFechaInicio());
-        dto.setFechaFin(t.getFechaFin());
+        dto.setHoraFin(t.getHoraFin());
+        dto.setHoraInicio(t.getHoraInicio());
         return dto;
     }
 
@@ -176,7 +207,22 @@ public class TurnoServiceImpl implements ITurnoService {
         t.setEstado(repoEstado.getReferenceById(dto.getEstado()));
         t.setDescripcion(dto.getDescripcion());
         t.setFechaInicio(dto.getFechaInicio());
-        t.setFechaFin(dto.getFechaFin());
+        t.setHoraFin(dto.getHoraFin());
+        t.setHoraInicio(dto.getHoraInicio());
+        return t;
+    }
+
+    public Turno mapearAPersistenciaBarbero(TurnoDTOPeticionBarbero dto) {
+        Turno t = new Turno();
+
+        t.setCliente(repoCliente.getReferenceById(dto.getCliente()));
+        t.setServicioId(dto.getServicioId());
+        t.setBarberoId(dto.getBarberoId());
+        t.setEstado(repoEstado.getReferenceById(dto.getEstado()));
+        t.setDescripcion(dto.getDescripcion());
+        t.setFechaInicio(LocalDate.now());
+        t.setHoraFin(null);
+        t.setHoraInicio(null);
         return t;
     }
 
@@ -194,7 +240,8 @@ public class TurnoServiceImpl implements ITurnoService {
         t.setEstado(repoEstado.getReferenceById(dto.getEstado()));
         t.setDescripcion(dto.getDescripcion());
         t.setFechaInicio(dto.getFechaInicio());
-        t.setFechaFin(dto.getFechaFin());
+        t.setHoraInicio(dto.getHoraInicio());
+        t.setHoraFin(dto.getHoraFin());
         return t;
     }
 

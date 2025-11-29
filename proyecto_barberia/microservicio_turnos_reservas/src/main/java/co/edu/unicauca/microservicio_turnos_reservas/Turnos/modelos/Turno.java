@@ -41,10 +41,10 @@ public class Turno {
     @Column(name = "turno_descripcion", length = 50, nullable = false)
     private String descripcion;
 
-    @Column(name = "turno_fecha_inicio", nullable = false)
-    private LocalTime fechaInicio;
+    @Column(name = "turno_fecha", nullable = false)
+    private LocalDate fechaInicio;
 
-    @Column(name = "turno_hora_inicio", nullable = false)
+    @Column(name = "turno_hora_inicio", nullable = true)
     private LocalTime HoraInicio;
 
     @Column(name = "turno_hora_fin", nullable = true)

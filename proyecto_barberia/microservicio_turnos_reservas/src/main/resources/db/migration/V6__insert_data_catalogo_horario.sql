@@ -14,10 +14,12 @@ VALUES
 ('CANCELADO'),
 ('COMPLETADO');
 
-INSERT INTO turno (reserva_id, cliente_id, servicio_id, barbero_id, estado_id, turno_descripcion, turno_fecha_hora_inicio, turno_fecha_hora_fin)
+INSERT INTO turno (reserva_id, cliente_id, servicio_id, barbero_id, estado_id, turno_descripcion, turno_hora_inicio, turno_hora_fin, turno_fecha)
 VALUES
-(1, '4', 1, '2', 1, 'Corte básico', '2025-02-25', '2025-02-25'),
-(2, '4', 2, '3', 2, 'Corte premium', '2025-02-26', '2025-02-26');
+(1, '4', 1, '2', 1, 'Corte básico', '08:00', null,'2025-11-21'),
+(2, '4', 2, '3', 2, 'Corte premium', '10:00', null,'2025-11-22'),
+(3, '4', 2, '3', 2, 'Corte premium', '10:00', null,'2025-11-23'),
+(null, '4', 2, '3', 2, 'Corte premium', '10:00', null,'2025-11-24');
 
 INSERT INTO tipo_incidencia (tipoincidencia_nombre)
 VALUES

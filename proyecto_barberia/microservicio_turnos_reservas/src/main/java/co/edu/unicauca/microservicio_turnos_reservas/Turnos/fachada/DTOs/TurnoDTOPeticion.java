@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 @Getter
 @Setter
@@ -15,5 +16,6 @@ public class TurnoDTOPeticion {
     private Integer estado;
     private String descripcion;
     private LocalDate fechaInicio;
-    private LocalDate fechaFin;
+    private LocalTime HoraInicio;
+    private LocalTime HoraFin;
 }

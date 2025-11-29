@@ -12,8 +12,6 @@ public class ServicioDTORespuesta {
 
     private Integer categoriaId;
 
-    private String administradorId;
-
     private String descripcion;
 
     private Integer duracion;
