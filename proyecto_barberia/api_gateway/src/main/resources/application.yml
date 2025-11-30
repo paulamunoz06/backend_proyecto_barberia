@@ -38,6 +38,17 @@ spring:
           filters:
             - JwtRelay
 
+        # RUTAS PROTEGIDAS (identidad)
+        - id: reservas-turnos-service
+          uri: http://turnos-reservas-service:5002
+          predicates:
+            - Path=/api/cliente, /api/cliente/**,
+              /api/reserva, /api/reserva/**,
+              /api/incidencia, /api/incidencia/**,
+              /api/turno, /api/turno/**
+          filters:
+            - JwtRelay
+
   main:
     web-application-type: reactive
 

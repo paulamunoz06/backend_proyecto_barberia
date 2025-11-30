@@ -1,6 +1,7 @@
 package co.edu.unicauca.microservicio_turnos_reservas.Turnos.fachada.servicios;
 
 import co.edu.unicauca.microservicio_turnos_reservas.Cliente.accesoADatos.ClienteRepository;
+import co.edu.unicauca.microservicio_turnos_reservas.Cliente.fachada.servicios.CatalogoServiceClient;
 import co.edu.unicauca.microservicio_turnos_reservas.Cliente.modelos.Cliente;
 import co.edu.unicauca.microservicio_turnos_reservas.Excepciones.excepcionesPropias.EntidadNoExisteException;
 import co.edu.unicauca.microservicio_turnos_reservas.Excepciones.excepcionesPropias.ReglaNegocioExcepcion;
@@ -9,7 +10,6 @@ import co.edu.unicauca.microservicio_turnos_reservas.Turnos.accesoADatos.EstadoR
 import co.edu.unicauca.microservicio_turnos_reservas.Reservas.accesoADatos.ReservaRepository;
 import co.edu.unicauca.microservicio_turnos_reservas.Turnos.accesoADatos.TurnoRepository;
 import co.edu.unicauca.microservicio_turnos_reservas.Turnos.fachada.DTOs.TurnoDTOPeticion;
-import co.edu.unicauca.microservicio_turnos_reservas.Turnos.fachada.DTOs.TurnoDTOPeticionBarbero;
 import co.edu.unicauca.microservicio_turnos_reservas.Turnos.fachada.DTOs.TurnoDTORespuesta;
 import co.edu.unicauca.microservicio_turnos_reservas.Turnos.modelos.Estado;
 import co.edu.unicauca.microservicio_turnos_reservas.Turnos.modelos.Turno;
@@ -93,17 +93,10 @@ public class TurnoServiceImpl implements ITurnoService {
 
     @Override
     public TurnoDTORespuesta save(TurnoDTOPeticion turnoDTO) {
-        validarFechaReserva(turnoDTO.getFechaInicio());
+        validarTurno(turnoDTO);
 
         Cliente cliente = repoCliente.findById(turnoDTO.getCliente()).orElseThrow(() -> new EntidadNoExisteException("Cliente no encontrado con ID: " + turnoDTO.getCliente()));
-        Estado estado = repoEstado.findById(turnoDTO.getEstado()).orElseThrow(() -> new EntidadNoExisteException("Estado no encontrado con ID: " + turnoDTO.getEstado()));
-
-        if (!catalogoServiceClient.validarBarbero(turnoDTO.getBarberoId())) {
-            throw new EntidadNoExisteException("Barbero no encontrado con ID: " + turnoDTO.getBarberoId());
-        }
-        if (!catalogoServiceClient.validarServicio(turnoDTO.getServicioId())) {
-            throw new EntidadNoExisteException("Servicio no encontrado con ID: " + turnoDTO.getServicioId());
-        }
+        Estado estado = repoEstado.findById(1).orElseThrow(() -> new EntidadNoExisteException("Estado no encontrado"));
 
         if (turnoDTO.getReserva() != null) {
             Reserva reserva = repoReserva.findById(turnoDTO.getReserva()).orElseThrow(() -> new EntidadNoExisteException("Reserva no encontrada con ID: " + turnoDTO.getReserva()));
@@ -113,45 +106,29 @@ public class TurnoServiceImpl implements ITurnoService {
         turno.setCliente(cliente);
         turno.setEstado(estado);
 
-        Turno turnoGuardado = turnoRepository.save(turno);
-
-        return mapearARespuesta(turnoGuardado);
-    }
-
-    @Override
-    public TurnoDTORespuesta saveBarbero(TurnoDTOPeticionBarbero turnoDTO) {
-        Cliente cliente = repoCliente.findById(turnoDTO.getCliente()).orElseThrow(() -> new EntidadNoExisteException("Cliente no encontrado con ID: " + turnoDTO.getCliente()));
-        Estado estado = repoEstado.findById(turnoDTO.getEstado()).orElseThrow(() -> new EntidadNoExisteException("Estado no encontrado con ID: " + turnoDTO.getEstado()));
-
-        if (!catalogoServiceClient.validarBarbero(turnoDTO.getBarberoId())) {
-            throw new EntidadNoExisteException("Barbero no encontrado con ID: " + turnoDTO.getBarberoId());
+        if (turnoDTO.getHoraInicio() != null) {
+            turno.setHoraInicio(encontrarHora(turnoDTO.getBarberoId(),turnoDTO.getFechaInicio()));
+        }else {
+            turno.setHoraInicio(turnoDTO.getHoraInicio());
         }
-        if (!catalogoServiceClient.validarServicio(turnoDTO.getServicioId())) {
-            throw new EntidadNoExisteException("Servicio no encontrado con ID: " + turnoDTO.getServicioId());
-        }
-        Turno turno = mapearAPersistenciaBarbero(turnoDTO);
-        turno.setCliente(cliente);
-        turno.setEstado(estado);
-        turno.setHoraInicio(encontrarHora(mapearARespuesta(turno)));
 
         Turno turnoGuardado = turnoRepository.save(turno);
-
         return mapearARespuesta(turnoGuardado);
     }
 
     @Override
     public TurnoDTORespuesta update(Integer id, TurnoDTORespuesta turnoDTO) {
-        validarFechaReserva(turnoDTO.getFechaInicio());
+        TurnoDTOPeticion turnoDTOValidacion = new TurnoDTOPeticion();
+        turnoDTOValidacion.setBarberoId(turnoDTO.getBarberoId());
+        turnoDTOValidacion.setServicioId(turnoDTO.getServicioId());
+        turnoDTOValidacion.setFechaInicio(turnoDTO.getFechaInicio());
+        turnoDTOValidacion.setHoraInicio(turnoDTO.getHoraInicio());
+
+        validarTurno(turnoDTOValidacion);
+
         Turno turnoExistente = turnoRepository.findById(id).orElseThrow(() -> new EntidadNoExisteException("Turno no encontrado con ID: " + id));
         Cliente cliente = repoCliente.findById(turnoDTO.getCliente()).orElseThrow(() -> new EntidadNoExisteException("Cliente no encontrado con ID: " + turnoDTO.getCliente()));
         Estado estado = repoEstado.findById(turnoDTO.getEstado()).orElseThrow(() -> new EntidadNoExisteException("Estado no encontrado con ID: " + turnoDTO.getEstado()));
-
-        if (!catalogoServiceClient.validarBarbero(turnoDTO.getBarberoId())) {
-            throw new EntidadNoExisteException("Barbero no encontrado con ID: " + turnoDTO.getBarberoId());
-        }
-        if (!catalogoServiceClient.validarServicio(turnoDTO.getServicioId())) {
-            throw new EntidadNoExisteException("Servicio no encontrado con ID: " + turnoDTO.getServicioId());
-        }
 
         turnoExistente.setReserva(turnoExistente.getReserva());
         turnoExistente.setCliente(cliente);
@@ -160,15 +137,27 @@ public class TurnoServiceImpl implements ITurnoService {
         turnoExistente.setEstado(estado);
         turnoExistente.setDescripcion(turnoDTO.getDescripcion());
         turnoExistente.setFechaInicio(turnoDTO.getFechaInicio());
-        turnoExistente.setHoraInicio(encontrarHora(turnoDTO));
+        if (turnoDTOValidacion.getHoraInicio() != null) {
+            turnoExistente.setHoraInicio(encontrarHora(turnoDTO.getBarberoId(),turnoDTO.getFechaInicio()));
+        }else {
+            turnoExistente.setHoraInicio(turnoDTOValidacion.getHoraInicio());
+        }
 
         Turno turnoActualizado = turnoRepository.save(turnoExistente);
         return mapearARespuesta(turnoActualizado);
-
     }
 
     @Override
-    public LocalTime encontrarHora(TurnoDTORespuesta turno) {
+    public TurnoDTORespuesta updateEstado(Integer idTurno, Integer idEstado) {
+        Turno turnoExistente = turnoRepository.findById(idTurno).orElseThrow(() -> new EntidadNoExisteException("Turno no encontrado con ID: " + idTurno));
+        Estado estado = repoEstado.findById(idEstado).orElseThrow(() -> new EntidadNoExisteException("Estado no encontrado con ID: " + idEstado));
+        turnoExistente.setEstado(estado);
+        Turno turnoActualizado = turnoRepository.save(turnoExistente);
+        return mapearARespuesta(turnoActualizado);
+    }
+
+    @Override
+    public LocalTime encontrarHora(String idBarbero, LocalDate fechaInicio) {
         return null;
     }
 
@@ -204,55 +193,40 @@ public class TurnoServiceImpl implements ITurnoService {
         t.setCliente(repoCliente.getReferenceById(dto.getCliente()));
         t.setServicioId(dto.getServicioId());
         t.setBarberoId(dto.getBarberoId());
-        t.setEstado(repoEstado.getReferenceById(dto.getEstado()));
         t.setDescripcion(dto.getDescripcion());
         t.setFechaInicio(dto.getFechaInicio());
-        t.setHoraFin(dto.getHoraFin());
-        t.setHoraInicio(dto.getHoraInicio());
-        return t;
-    }
-
-    public Turno mapearAPersistenciaBarbero(TurnoDTOPeticionBarbero dto) {
-        Turno t = new Turno();
-
-        t.setCliente(repoCliente.getReferenceById(dto.getCliente()));
-        t.setServicioId(dto.getServicioId());
-        t.setBarberoId(dto.getBarberoId());
-        t.setEstado(repoEstado.getReferenceById(dto.getEstado()));
-        t.setDescripcion(dto.getDescripcion());
-        t.setFechaInicio(LocalDate.now());
         t.setHoraFin(null);
-        t.setHoraInicio(null);
-        return t;
-    }
-
-    public Turno mapearAPersistenciaRespuesta(TurnoDTORespuesta dto) {
-        Turno t = new Turno();
-        t.setId(dto.getId());
-
-        if (dto.getReserva() != null) {
-            t.setReserva(repoReserva.getReferenceById(dto.getReserva()));
-        }
-
-        t.setCliente(repoCliente.getReferenceById(dto.getCliente()));
-        t.setServicioId(dto.getServicioId());
-        t.setBarberoId(dto.getBarberoId());
-        t.setEstado(repoEstado.getReferenceById(dto.getEstado()));
-        t.setDescripcion(dto.getDescripcion());
-        t.setFechaInicio(dto.getFechaInicio());
         t.setHoraInicio(dto.getHoraInicio());
-        t.setHoraFin(dto.getHoraFin());
         return t;
     }
 
-    private void validarFechaReserva(LocalDate fechaReserva) {
-        LocalDate hoy = LocalDate.now();
-        if (fechaReserva.isBefore(hoy) || fechaReserva.isEqual(hoy)) {
-            throw new ReglaNegocioExcepcion("No se puede editar una reserva para hoy o fechas pasadas");
+    public void validarTurno(TurnoDTOPeticion turnoDTO) {
+        // Validar barbero
+        if (!catalogoServiceClient.validarBarbero(turnoDTO.getBarberoId())) {
+            throw new EntidadNoExisteException("Barbero no encontrado con ID: " + turnoDTO.getBarberoId());
         }
-        LocalDate fechaMinima = hoy.plusDays(1);
-        if (fechaReserva.isBefore(fechaMinima)) {
-            throw new ReglaNegocioExcepcion("Solo se pueden editar reservas con al menos 1 día de anticipación");
+
+        // Validar servicio
+        if (!catalogoServiceClient.validarServicio(turnoDTO.getServicioId())) {
+            throw new EntidadNoExisteException("Servicio no encontrado con ID: " + turnoDTO.getServicioId());
+        }
+
+        // Validar fechas
+        if(turnoDTO.getFechaInicio() != null){
+            validarFechasTurno(turnoDTO.getFechaInicio(), turnoDTO.getHoraInicio());
+        }
+    }
+
+    private void validarFechasTurno(LocalDate fechaInicio, LocalTime horaInicio) {
+        LocalDate hoy = LocalDate.now();
+
+        if (fechaInicio.isBefore(hoy)) {
+            throw new ReglaNegocioExcepcion("No se puede crear un turno para fechas pasadas");
+        }
+        if (fechaInicio.isEqual(hoy) && horaInicio != null) {
+            if (horaInicio.isBefore(LocalTime.now())) {
+                throw new ReglaNegocioExcepcion("No se puede crear un turno para horas pasadas");
+            }
         }
     }
 }

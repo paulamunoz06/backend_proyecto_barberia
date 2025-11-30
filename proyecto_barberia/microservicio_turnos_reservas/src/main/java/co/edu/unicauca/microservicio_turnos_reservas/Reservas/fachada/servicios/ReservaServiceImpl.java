@@ -8,15 +8,17 @@ import co.edu.unicauca.microservicio_turnos_reservas.Reservas.accesoADatos.Reser
 import co.edu.unicauca.microservicio_turnos_reservas.Reservas.fachada.DTOs.ReservaDTOPeticion;
 import co.edu.unicauca.microservicio_turnos_reservas.Reservas.fachada.DTOs.ReservaDTORespuesta;
 import co.edu.unicauca.microservicio_turnos_reservas.Reservas.modelos.Reserva;
+import co.edu.unicauca.microservicio_turnos_reservas.Turnos.accesoADatos.EstadoRepository;
 import co.edu.unicauca.microservicio_turnos_reservas.Turnos.fachada.DTOs.TurnoDTOPeticion;
 import co.edu.unicauca.microservicio_turnos_reservas.Turnos.fachada.DTOs.TurnoDTORespuesta;
 import co.edu.unicauca.microservicio_turnos_reservas.Turnos.fachada.servicios.TurnoServiceImpl;
+import co.edu.unicauca.microservicio_turnos_reservas.Turnos.modelos.Estado;
 import co.edu.unicauca.microservicio_turnos_reservas.Turnos.modelos.Turno;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,6 +27,9 @@ public class ReservaServiceImpl implements IReservaService{
 
     @Autowired
     private ClienteRepository repoCliente;
+
+    @Autowired
+    private EstadoRepository repoEstado;
 
     @Autowired
     private TurnoServiceImpl serviceTurno;
@@ -45,52 +50,98 @@ public class ReservaServiceImpl implements IReservaService{
 
     @Override
     public ReservaDTORespuesta findById(Integer id) {
-        Reserva horario = repo.findById(id).orElseThrow(() -> new EntidadNoExisteException("No existe una reserva con id: " + id));
-        return mapearARespuesta(horario);
+        Reserva reserva = repo.findById(id).orElseThrow(() -> new EntidadNoExisteException("No existe una reserva con id: " + id));
+        return mapearARespuesta(reserva);
     }
 
     @Override
     public List<ReservaDTORespuesta> findByClienteId(String id) {
-        return List.of();
+        List<Reserva> reservas = repo.findByClienteId(id);
+        if (reservas.isEmpty()) {
+            throw new EntidadNoExisteException("No hay reservas para el cliente con ID: " + id);
+        }
+        return reservas.stream()
+                .map(this::mapearARespuesta)
+                .collect(Collectors.toList());
     }
 
     @Override
+    @Transactional
     public ReservaDTORespuesta save(ReservaDTOPeticion reservaDTO) {
         validarFechaReserva(reservaDTO.getFechaReserva());
 
         Cliente cliente = repoCliente.findById(reservaDTO.getCliente()).orElseThrow(() -> new EntidadNoExisteException("Cliente no encontrado con ID: " + reservaDTO.getCliente()));
-
-        Reserva reserva = mapearAPersistencia(reservaDTO);
+        Reserva reserva = new Reserva();
+        reserva.setFechaReserva(reservaDTO.getFechaReserva());
         reserva.setCliente(cliente);
 
-        Reserva reservaGuardada = repo.save(reserva);
+        if (reservaDTO.getTurnos() != null && !reservaDTO.getTurnos().isEmpty()) {
+            for (TurnoDTOPeticion turnoDTO : reservaDTO.getTurnos()) {
+                serviceTurno.validarTurno(turnoDTO);
 
+                Turno turno = new Turno();
+                turno.setCliente(cliente);
+                turno.setServicioId(turnoDTO.getServicioId());
+                turno.setBarberoId(turnoDTO.getBarberoId());
+                turno.setDescripcion(turnoDTO.getDescripcion());
+                turno.setFechaInicio(turnoDTO.getFechaInicio());
+                turno.setHoraInicio(turnoDTO.getHoraInicio());
+                turno.setHoraFin(10 + servicio.getDuracion() + servicio.getPreparacion());
+
+                Estado estado = repoEstado.findById(1).orElseThrow(() -> new EntidadNoExisteException("Estado no encontrado"));
+                turno.setEstado(estado);
+
+                reserva.agregarTurno(turno);
+            }
+        } else {
+            throw new ReglaNegocioExcepcion("La reserva debe tener al menos un turno");
+        }
+
+        Reserva reservaGuardada = repo.save(reserva);
         return mapearARespuesta(reservaGuardada);
     }
 
     @Override
-    public ReservaDTORespuesta update(Integer id, ReservaDTOPeticion reservaDTO) {
+    @Transactional
+    public ReservaDTORespuesta update(Integer id, ReservaDTORespuesta reservaDTO) {
         Reserva reservaExistente = repo.findById(id).orElseThrow(() -> new EntidadNoExisteException("Reserva no encontrada con ID: " + id));
+        if (reservaExistente.getFechaReserva().isBefore(LocalDate.now())) {
+            throw new ReglaNegocioExcepcion("No se puede editar una reserva pasada");
+        }
 
         validarFechaReserva(reservaDTO.getFechaReserva());
 
-        Cliente cliente = repoCliente.findById(reservaDTO.getCliente())
-                .orElseThrow(() -> new EntidadNoExisteException("Cliente no encontrado con ID: " + reservaDTO.getCliente()));
-
-        reservaExistente.setCliente(cliente);
+        reservaExistente.setCliente(reservaExistente.getCliente());
         reservaExistente.setFechaReserva(reservaDTO.getFechaReserva());
-
-        for (Turno turno : reservaExistente.getTurnos()) {
-            serviceTurno.delete(turno.getId());
-        }
         reservaExistente.getTurnos().clear();
 
-        for (TurnoDTOPeticion turnoDTO : reservaDTO.getTurnos()) {
-            turnoDTO.setReserva(id);
-            TurnoDTORespuesta nuevoTurno = serviceTurno.save(turnoDTO);
-            Turno turnoEntity = serviceTurno.mapearAPersistenciaRespuesta(nuevoTurno);
-            turnoEntity.setReserva(reservaExistente);
-            reservaExistente.getTurnos().add(turnoEntity);
+        if (reservaDTO.getTurnos() != null && !reservaDTO.getTurnos().isEmpty()) {
+            for (TurnoDTORespuesta turnoDTO : reservaDTO.getTurnos()) {
+                if(turnoDTO.getFechaInicio() != reservaDTO.getFechaReserva()) {
+                    throw new ReglaNegocioExcepcion("La fecha del turno debe ser igual a la fecha del turno");
+                }
+                TurnoDTOPeticion turnoValidar = new TurnoDTOPeticion();
+                turnoValidar.setBarberoId(turnoDTO.getBarberoId());
+                turnoValidar.setServicioId(turnoDTO.getServicioId());
+                turnoValidar.setFechaInicio(turnoDTO.getFechaInicio());
+                turnoValidar.setHoraInicio(turnoDTO.getHoraInicio());
+                serviceTurno.validarTurno(turnoValidar);
+
+                Turno turno = new Turno();
+                turno.setCliente(reservaExistente.getCliente());
+                turno.setServicioId(turnoDTO.getServicioId());
+                turno.setBarberoId(turnoDTO.getBarberoId());
+                turno.setDescripcion(turnoDTO.getDescripcion());
+                turno.setFechaInicio(turnoDTO.getFechaInicio());
+                turno.setHoraInicio(turnoDTO.getHoraInicio());
+
+                Estado estado = repoEstado.findById(1).orElseThrow(() -> new EntidadNoExisteException("Estado no encontrado"));
+                turno.setEstado(estado);
+
+                reservaExistente.agregarTurno(turno);
+            }
+        } else {
+            throw new ReglaNegocioExcepcion("La reserva debe tener al menos un turno");
         }
 
         Reserva reservaActualizada = repo.save(reservaExistente);
@@ -98,9 +149,34 @@ public class ReservaServiceImpl implements IReservaService{
     }
 
     @Override
+    @Transactional
     public boolean delete(Integer id) {
         Reserva reserva = repo.findById(id).orElseThrow(() -> new EntidadNoExisteException("Reserva no encontrada con ID: " + id));
+
+        if (reserva.getFechaReserva().isBefore(LocalDate.now())) {
+            throw new ReglaNegocioExcepcion("No se puede eliminar una reserva pasada");
+        }
+
         repo.delete(reserva);
+        return true;
+    }
+
+    @Override
+    @Transactional
+    public boolean cancelar(Integer id) {
+        Reserva reserva = repo.findById(id).orElseThrow(() -> new EntidadNoExisteException("Reserva no encontrada con ID: " + id));
+
+        if (reserva.getFechaReserva().isBefore(LocalDate.now())) {
+            throw new ReglaNegocioExcepcion("No se puede cancelar una reserva pasada");
+        }
+
+        Estado estadoCancelado = repoEstado.findById(3).orElseThrow(() -> new EntidadNoExisteException("Estado cancelado no encontrado"));
+
+        for (Turno turno : reserva.getTurnos()) {
+            turno.setEstado(estadoCancelado);
+        }
+
+        repo.save(reserva);
         return true;
     }
 
@@ -113,37 +189,22 @@ public class ReservaServiceImpl implements IReservaService{
         List<TurnoDTORespuesta> turnosDTO = r.getTurnos()
                 .stream()
                 .map(this.serviceTurno::mapearARespuesta)
-                .toList();
+                .collect(Collectors.toList());
 
         dto.setTurnos(turnosDTO);
         return dto;
     }
 
-    private Reserva mapearAPersistencia(ReservaDTOPeticion dto) {
-        Reserva r = new Reserva();
-        r.setCliente(repoCliente.getReferenceById(dto.getCliente()));
-        r.setFechaReserva(dto.getFechaReserva());
-
-        List<Turno> turnos = new ArrayList<>();
-        for (TurnoDTOPeticion turnoDTO : dto.getTurnos()) {
-            Turno turno = this.serviceTurno.mapearAPersistencia(turnoDTO);
-            turno.setReserva(r);
-            turnos.add(turno);
-        }
-
-        r.setTurnos(turnos);
-        return r;
-    }
-
     private void validarFechaReserva(LocalDate fechaReserva) {
         LocalDate hoy = LocalDate.now();
-        if (fechaReserva.isBefore(hoy) || fechaReserva.isEqual(hoy)) {
-            throw new ReglaNegocioExcepcion("No se puede editar una reserva para hoy o fechas pasadas");
-        }
+
         LocalDate fechaMinima = hoy.plusDays(1);
         if (fechaReserva.isBefore(fechaMinima)) {
-            throw new ReglaNegocioExcepcion("Solo se pueden editar reservas con al menos 1 día de anticipación");
+             throw new ReglaNegocioExcepcion("Solo se pueden crear reservas con al menos 1 día de anticipación");
+        }
+
+        if (fechaReserva.isBefore(hoy)) {
+            throw new ReglaNegocioExcepcion("No se puede crear una reserva para fechas pasadas");
         }
     }
-
 }

@@ -2,8 +2,6 @@ package co.edu.unicauca.microservicio_catalogo_horario.Barberos.controladores;
 
 import co.edu.unicauca.microservicio_catalogo_horario.Barberos.fachada.DTOs.BarberoDTOPeticion;
 import co.edu.unicauca.microservicio_catalogo_horario.Barberos.fachada.DTOs.BarberoDTORespuesta;
-import co.edu.unicauca.microservicio_catalogo_horario.Barberos.fachada.DTOs.BarberoFranjaDTOPeticion;
-import co.edu.unicauca.microservicio_catalogo_horario.Barberos.fachada.DTOs.BarberoFranjaDTORespuesta;
 import co.edu.unicauca.microservicio_catalogo_horario.Barberos.fachada.services.IBarberoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

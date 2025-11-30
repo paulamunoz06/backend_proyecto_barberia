@@ -1,9 +1,9 @@
 CREATE TABLE cliente (
     cliente_id VARCHAR(20) PRIMARY KEY,
-    cliente_nombre CHAR(50) NOT NULL,
-    cliente_email CHAR(50) NOT NULL,
+    cliente_nombre VARCHAR(50) NOT NULL,
+    cliente_email VARCHAR(50) NOT NULL,
     cliente_telefono BIGINT NOT NULL,
-    cliente_estado CHAR(20) NOT NULL CHECK (cliente_estado IN ('ACTIVO', 'INACTIVO'))
+    cliente_estado VARCHAR(20) NOT NULL CHECK (cliente_estado IN ('ACTIVO', 'INACTIVO'))
 );
 
 CREATE TABLE reserva (
@@ -17,7 +17,7 @@ CREATE TABLE reserva (
 
 CREATE TABLE estado (
     estado_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    estado_nombre CHAR(50) NOT NULL
+    estado_nombre VARCHAR(50) NOT NULL
 );
 
 CREATE TABLE turno (
@@ -28,7 +28,7 @@ CREATE TABLE turno (
     servicio_id INT NOT NULL,
     barbero_id VARCHAR(20) NOT NULL,
     estado_id INT NOT NULL,
-    turno_descripcion CHAR(50) NOT NULL,
+    turno_descripcion VARCHAR(50) NOT NULL,
     turno_hora_inicio TIME NULL,
     turno_hora_fin TIME NULL,
     turno_fecha DATE NOT NULL,
@@ -40,14 +40,14 @@ CREATE TABLE turno (
 
 CREATE TABLE tipo_incidencia (
     tipoincidencia_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    tipoincidencia_nombre CHAR(50) NOT NULL
+    tipoincidencia_nombre VARCHAR(50) NOT NULL
 );
 
 CREATE TABLE incidencia (
     incidencia_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     turno_id INT NOT NULL,
     tipoincidencia_id INT NOT NULL,
-    tipoincidencia_descripcion CHAR(50) NOT NULL,
+    tipoincidencia_descripcion VARCHAR(50) NOT NULL,
 
     CONSTRAINT fk_incidencia_turno FOREIGN KEY (turno_id) REFERENCES turno(turno_id),
 

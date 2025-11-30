@@ -1,8 +1,8 @@
-package co.edu.unicauca.microservicio_catalogo_horario.AsignacionBarberos.strategy;
+package co.edu.unicauca.microservicio_catalogo_horario.AsignacionBarberos.fachada.services;
 
 import co.edu.unicauca.microservicio_catalogo_horario.Barberos.fachada.DTOs.BarberoDTORespuesta;
-import co.edu.unicauca.microservicio_catalogo_horario.Barberos.fachada.DTOs.BarberoFranjaDTOPeticion;
-import co.edu.unicauca.microservicio_catalogo_horario.Barberos.fachada.DTOs.BarberoFranjaDTORespuesta;
+import co.edu.unicauca.microservicio_catalogo_horario.AsignacionBarberos.fachada.DTOs.BarberoFranjaDTOPeticion;
+import co.edu.unicauca.microservicio_catalogo_horario.AsignacionBarberos.fachada.DTOs.BarberoFranjaDTORespuesta;
 import co.edu.unicauca.microservicio_catalogo_horario.Barberos.fachada.services.BarberoServiceImpl;
 import co.edu.unicauca.microservicio_catalogo_horario.Excepciones.excepcionesPropias.ReglaNegocioExcepcion;
 import co.edu.unicauca.microservicio_catalogo_horario.HorariosLaborales.fachada.services.FranjaHorarioServiceImpl;

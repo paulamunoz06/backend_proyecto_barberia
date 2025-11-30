@@ -1,7 +1,8 @@
-package co.edu.unicauca.microservicio_catalogo_horario.AsignacionBarberos.strategy;
+package co.edu.unicauca.microservicio_catalogo_horario.AsignacionBarberos.fachada.services;
+
 import co.edu.unicauca.microservicio_catalogo_horario.Barberos.fachada.DTOs.BarberoDTORespuesta;
-import co.edu.unicauca.microservicio_catalogo_horario.Barberos.fachada.DTOs.BarberoFranjaDTOPeticion;
-import co.edu.unicauca.microservicio_catalogo_horario.Barberos.fachada.DTOs.BarberoFranjaDTORespuesta;
+import co.edu.unicauca.microservicio_catalogo_horario.AsignacionBarberos.fachada.DTOs.BarberoFranjaDTOPeticion;
+import co.edu.unicauca.microservicio_catalogo_horario.AsignacionBarberos.fachada.DTOs.BarberoFranjaDTORespuesta;
 import co.edu.unicauca.microservicio_catalogo_horario.Barberos.fachada.services.BarberoServiceImpl;
 import co.edu.unicauca.microservicio_catalogo_horario.Excepciones.excepcionesPropias.ReglaNegocioExcepcion;
 import co.edu.unicauca.microservicio_catalogo_horario.HorariosLaborales.fachada.services.FranjaHorarioServiceImpl;
@@ -14,10 +15,12 @@ import org.springframework.stereotype.Service;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 @Service
-public class AsignarProximidad implements AsignarBarbero {
+public class AsignarPreferencia implements AsignarBarbero {
     @Autowired
     private BarberoServiceImpl barberoService;
 
@@ -50,13 +53,14 @@ public class AsignarProximidad implements AsignarBarbero {
             boolean falloEnCadena = false;
 
             for (Integer servicioId : peticion.getServicioBarberoIds().keySet()) {
-                List<BarberoDTORespuesta> barberosCapacitados = barberoService.findService(servicioId);
+                String idBarbero = peticion.getServicioBarberoIds().get(servicioId);
 
-                if (barberosCapacitados.isEmpty()) {
-                    throw new ReglaNegocioExcepcion("No hay barberos capacitados para el servicio " + servicioId);
+                BarberoDTORespuesta barbero = barberoService.findById(idBarbero);
+                if(!barberoService.barberoHaceServicio(barbero.getId(), servicioId)) {
+                    throw new ReglaNegocioExcepcion("El barbero con id " + idBarbero + " no es especialista en el servicio " + servicioId);
                 }
+                BarberoDTORespuesta barberoElegido = seleccionarBarbero(barbero, servicioId, fechaBusqueda, horaInicio);
 
-                BarberoDTORespuesta barberoElegido = seleccionarBarberoPorProximidad(barberosCapacitados, servicioId, fechaBusqueda, horaInicio);
                 if (barberoElegido == null) {
                     falloEnCadena = true;
                     break;
@@ -88,19 +92,15 @@ public class AsignarProximidad implements AsignarBarbero {
         return respuestas;
     }
 
-    private BarberoDTORespuesta seleccionarBarberoPorProximidad(List<BarberoDTORespuesta> barberos, Integer servicioId, LocalDate fecha, LocalTime horaInicio) {
-        for (BarberoDTORespuesta b : barberos) {
-            Servicio servicio = servicioService.findByIdInt(servicioId);
-            int duracion = 10 + servicio.getDuracion() + servicio.getPreparacion();
-            LocalTime horaFin = horaInicio.plusMinutes(duracion);
+    private BarberoDTORespuesta seleccionarBarbero(BarberoDTORespuesta barbero, Integer servicioId, LocalDate fecha, LocalTime horaInicio) {
+        Servicio servicio = servicioService.findByIdInt(servicioId);
+        int duracion = 10 + servicio.getDuracion() + servicio.getPreparacion();
+        LocalTime horaFin = horaInicio.plusMinutes(duracion);
 
-            boolean disponible = franjaService.tieneDuracionContinua(b.getId(), fecha, horaInicio, horaFin);
-            if (disponible) {
-                return b;
-            }
+        boolean disponible = franjaService.tieneDuracionContinua(barbero.getId(), fecha, horaInicio, horaFin);
+        if (disponible) {
+            return barbero;
         }
         return null;
     }
-
 }
-

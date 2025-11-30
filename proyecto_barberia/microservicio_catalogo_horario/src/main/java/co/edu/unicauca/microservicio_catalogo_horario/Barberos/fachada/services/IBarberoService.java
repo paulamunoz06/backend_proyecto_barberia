@@ -2,8 +2,6 @@ package co.edu.unicauca.microservicio_catalogo_horario.Barberos.fachada.services
 
 import co.edu.unicauca.microservicio_catalogo_horario.Barberos.fachada.DTOs.BarberoDTOPeticion;
 import co.edu.unicauca.microservicio_catalogo_horario.Barberos.fachada.DTOs.BarberoDTORespuesta;
-import co.edu.unicauca.microservicio_catalogo_horario.Barberos.fachada.DTOs.BarberoFranjaDTOPeticion;
-import co.edu.unicauca.microservicio_catalogo_horario.Barberos.fachada.DTOs.BarberoFranjaDTORespuesta;
 import co.edu.unicauca.microservicio_catalogo_horario.Barberos.modelos.Barbero;
 
 import java.util.List;

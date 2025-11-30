@@ -1,4 +1,4 @@
-package co.edu.unicauca.microservicio_catalogo_horario.Barberos.fachada.DTOs;
+package co.edu.unicauca.microservicio_catalogo_horario.AsignacionBarberos.fachada.DTOs;
 
 import lombok.Getter;
 import lombok.Setter;

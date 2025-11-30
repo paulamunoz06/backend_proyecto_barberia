@@ -13,9 +13,7 @@ public class TurnoDTOPeticion {
     private String cliente;
     private Integer servicioId;
     private String barberoId;
-    private Integer estado;
     private String descripcion;
     private LocalDate fechaInicio;
     private LocalTime HoraInicio;
-    private LocalTime HoraFin;
 }
