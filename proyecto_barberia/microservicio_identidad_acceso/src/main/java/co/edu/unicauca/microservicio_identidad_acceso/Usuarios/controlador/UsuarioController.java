@@ -1,6 +1,7 @@
 package co.edu.unicauca.microservicio_identidad_acceso.Usuarios.controlador;
 
 import co.edu.unicauca.microservicio_identidad_acceso.Usuarios.fachada.DTOs.BarberoUsuarioDTOPeticion;
+import co.edu.unicauca.microservicio_identidad_acceso.Usuarios.fachada.DTOs.ClienteUsuarioDTOPeticion;
 import co.edu.unicauca.microservicio_identidad_acceso.Usuarios.fachada.services.UsuarioServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +20,7 @@ public class UsuarioController {
   }
 
   @PostMapping("/cliente")
-  public ResponseEntity<?> registerCliente(@RequestBody BarberoUsuarioDTOPeticion signUpRequest) {
-    return usuarioService.registerBarbero(signUpRequest);
+  public ResponseEntity<?> registerCliente(@RequestBody ClienteUsuarioDTOPeticion signUpRequest) {
+    return usuarioService.registerCiente(signUpRequest);
   }
 }

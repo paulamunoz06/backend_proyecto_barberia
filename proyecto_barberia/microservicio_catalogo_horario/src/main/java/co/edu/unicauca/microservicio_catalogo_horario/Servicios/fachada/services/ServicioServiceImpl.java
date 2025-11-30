@@ -2,6 +2,10 @@ package co.edu.unicauca.microservicio_catalogo_horario.Servicios.fachada.service
 
 import co.edu.unicauca.microservicio_catalogo_horario.Barberos.accesoADatos.BarberoRepository;
 import co.edu.unicauca.microservicio_catalogo_horario.Barberos.modelos.Barbero;
+import co.edu.unicauca.microservicio_catalogo_horario.Comunicacion.PublicacionEventos.EventPublisher;
+import co.edu.unicauca.microservicio_catalogo_horario.Comunicacion.PublicacionEventos.NotificacionDTO;
+import co.edu.unicauca.microservicio_catalogo_horario.Comunicacion.REST.TurnoDTORespuesta;
+import co.edu.unicauca.microservicio_catalogo_horario.Comunicacion.REST.TurnoServiceClient;
 import co.edu.unicauca.microservicio_catalogo_horario.Excepciones.excepcionesPropias.EntidadNoExisteException;
 import co.edu.unicauca.microservicio_catalogo_horario.Excepciones.excepcionesPropias.ReglaNegocioExcepcion;
 import co.edu.unicauca.microservicio_catalogo_horario.Servicios.accesoADatos.AdministradorRepository;
@@ -35,6 +39,12 @@ public class ServicioServiceImpl implements IServicioService {
 
     @Autowired
     private BarberoRepository barberoRepo;
+
+    @Autowired
+    private TurnoServiceClient turnoServiceClient;
+
+    @Autowired
+    private EventPublisher barberoEventPublisher;
 
     @Override
     public List<ServicioDTORespuesta> findAll() {
@@ -119,11 +129,15 @@ public class ServicioServiceImpl implements IServicioService {
             s.getBarberos().clear();
         }
 
-/*
-        //verificar cada barbero, si tiene turnos para ese servicioese dia envia al micro se notificaciones
-        if(){
+        List<TurnoDTORespuesta> tieneTurnosFuturos = turnoServiceClient.obtenerTurnosFuturosServicios(id);
+        if(!tieneTurnosFuturos.isEmpty()) {
+            barberoEventPublisher.servicioEnviarSolicitudEliminarTurnos(id);
 
-        }*/
+            for (TurnoDTORespuesta t : tieneTurnosFuturos) {
+                NotificacionDTO notificacion = new NotificacionDTO(turnoServiceClient.obtenerCorreo(t.getBarberoId()),"Estimado usuario, le informamos que uno de los servicios asignados a su reserva no se encuentra disponible. Hemos eliminado el servicio de su reserva");
+                barberoEventPublisher.enviarNotificacionClientes(notificacion);
+            }
+        }
 
         repo.delete(s);
         return true;

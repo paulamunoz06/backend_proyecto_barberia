@@ -5,15 +5,35 @@ INSERT INTO rol (rol_nombre) VALUES
 
 INSERT INTO usuario (usuario_id, usuario_password) VALUES
 ('1','$2a$10$Kw2ocP2gcltMoeM3COftfO5ArT6IA2fRk2xSSAhKRYji24PnMw4LC'),
-('2','$2a$10$1JXL0cE8SqemQjCwrq6BV.KRbJrTNfxzfRSHiMyFxLH5SRpxVc/SG'),
-('3','$2a$10$w7uxBwLXwYL.EQ4FREnyoex6UAEvENxBpXV4VFiPHhhOexSWdRQIO'),
-('4','$2a$10$Kw2ocP2gcltMoeM3COftfO5ArT6IA2fRk2xSSAhKRYji24PnMw4LC');
+('2', '$2a$10$ylSyyV7dTs67p2uNQq86kuYjUg9ocb/q/AmomXrcTxtahus0unzr2'),
+('3', '$2a$10$jQbT9gYd8301Kg81O9KVA.9bTLXT.6R92uxxAuTZOOS7zj5I4oIV.'),
+('4', '$2a$10$oN6pgj1kPvBWacTvFaWx5.C0Hk3PuhXI8mtfZKaOXHHERNJTRWZC.'),
+('5', '$2a$10$jlfKyw5bAbFaLaN.E/XSBOIrfe.VoY8/y/P21xq7jyT7TIx0AjLum'),
+('6', '$2a$10$16skgmubtAswZWUsrZeZRuQXSySpvx1MmhD27rSU7RpR2RQGChcqO'),
+('7', '$2a$10$QGaJ4ORTQ9bfN8ceonyMZeTRb8.SqaCYDN7M2qdvaGeRUeLc68k9G'),
+('8', '$2a$10$BKgo9OsLXW7U17LU2o6WvePHZ1hedNQIKsaGvL6hgkXxTptNOLk.2'),
+('9', '$2a$10$UdgK2BWQe5nPX3VVXCBOW.4Z5xzktD1KDRJK7CWTTonAqlecS5Mc2'),
+('10', '$2a$10$j0CLWzkyHUrPp9EPK3j1HeSrIjl8aY5Rdl/hoeNij9uE1Gk2TL0ae'),
+('11', '$2a$10$B6NPt9josPVmSy5XoxTm3.xFYyny./Z0SWs0zprVZMBwLF18M6ZZ.'),
+('12', '$2a$10$jP.YtovI1EHEYDQ4Kk.vdemvjaDs/70.6EgvAeW./N1NLYXyP6oy6'),
+('13', '$2a$10$wITSFsK.HFGks6NqXjxDpe55VsPzVZ/9Wo9BsyxtnaQm.mxePszGO'),
+('14', '$2a$10$Ek1mtx648XgdK7BCGDtctuiKu6TyiN6ujc16fwl08jxQS4fnd7.Sa');
 
 INSERT INTO usuario_roles (usuario_id, rol_id) VALUES
 ('1',1),
 ('2',2),
 ('3',2),
-('4',3);
+('4',2),
+('5',2),
+('6',2),
+('7',2),
+('8',2),
+('9',2),
+('10',2),
+('11',2),
+('12',2),
+('13',2),
+('14',3);
 
 INSERT INTO microservicio_permissions (microservice_name, endpoint_pattern, http_method, required_roles, description) VALUES
 ('catalogo-service', '/api/asignar*', 'GET', 'CLIENTE', ''),
@@ -54,6 +74,7 @@ INSERT INTO microservicio_permissions (microservice_name, endpoint_pattern, http
 INSERT INTO microservicio_permissions (microservice_name, endpoint_pattern, http_method, required_roles, description) VALUES
 ('reserva-service', '/api/cliente', 'GET', 'ADMINISTRADOR', 'Listar todos los clientes'),
 ('reserva-service', '/api/cliente/*', 'GET', 'CLIENTE,ADMINISTRADOR', 'Buscar cliente por ID'),
+('reserva-service', '/api/cliente/*/correo', 'GET', 'CLIENTE,ADMINISTRADOR', 'Buscar correo de cliente por ID'),
 ('reserva-service', '/api/cliente', 'POST', 'CLIENTE,ADMINISTRADOR', 'Crear un nuevo cliente'),
 ('reserva-service', '/api/cliente/*', 'PUT', 'CLIENTE,ADMINISTRADOR', 'Actualizar un cliente existente'),
 ('reserva-service', '/api/cliente/*', 'DELETE', 'CLIENTE,ADMINISTRADOR', 'Eliminar un cliente por ID'),
@@ -71,6 +92,8 @@ INSERT INTO microservicio_permissions (microservice_name, endpoint_pattern, http
 ('reserva-service', '/api/turno/barbero/*', 'GET', 'BARBERO,ADMINISTRADOR', 'Listar turnos por barbero'),
 ('reserva-service', '/api/turno/reserva/*', 'GET', 'CLIENTE,BARBERO,ADMINISTRADOR', 'Listar turnos por reserva'),
 ('reserva-service', '/api/turno/activas/barbero/*', 'GET', 'BARBERO,ADMINISTRADOR', 'Listar turnos activos por barbero'),
+('reserva-service', '/api/turno/activas/barbero/*/*', 'GET', 'BARBERO,ADMINISTRADOR', 'Listar turnos activos por barbero en una fecha'),
+('reserva-service', '/api/turno/activas/servicio/*', 'GET', 'ADMINISTRADOR', 'Listar turnos activos por servicio'),
 ('reserva-service', '/api/turno/*', 'GET', 'CLIENTE,BARBERO,ADMINISTRADOR', 'Buscar turno por ID'),
 ('reserva-service', '/api/turno', 'POST', 'CLIENTE,BARBERO,ADMINISTRADOR', 'Crear un nuevo turno'),
 ('reserva-service', '/api/turno/*', 'PUT', 'CLIENTE,BARBERO,ADMINISTRADOR', 'Actualizar un turno existente'),

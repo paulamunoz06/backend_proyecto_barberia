@@ -1,4 +1,4 @@
-package co.edu.unicauca.microservicio_catalogo_horario.PublicacionEventos;
+package co.edu.unicauca.microservicio_catalogo_horario.Comunicacion.PublicacionEventos;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.amqp.core.Queue;
@@ -10,23 +10,23 @@ import org.springframework.context.annotation.Bean;
 @Configuration
 public class RabbitMQConfig {
 
-    public static final String CREATEBARBERO_QUEUE = "createBarberoQueue";
-    public static final String UPDATEBARBERO_QUEUE = "updateBarberoQueue";
-    public static final String DELETEBARBERO_QUEUE = "deleteProjectQueue";
+    public static final String DELETE_TURNOS_BARBERO_QUEUE = "deleteTurnosBarberoQueue";
+    public static final String DELETE_TURNOS_SERVICIO_QUEUE = "deleteTurnosServicioQueue";
+    public static final String NOTIFICAR_CLIENTES_QUEUE = "notificarClientesQueue";
 
     @Bean
-    public Queue createBarberoQueue() {
-        return new Queue(CREATEBARBERO_QUEUE, true);
+    public Queue deleteTurnosBarberoQueue() {
+        return new Queue(DELETE_TURNOS_BARBERO_QUEUE, true);
     }
 
     @Bean
-    public Queue updateBarberoQueue() {
-        return new Queue(UPDATEBARBERO_QUEUE, true);
+    public Queue deleteTurnosServiciosQueue() {
+        return new Queue(DELETE_TURNOS_SERVICIO_QUEUE, true);
     }
 
     @Bean
-    public Queue deleteProjectQueue() {
-        return new Queue(DELETEBARBERO_QUEUE, true);
+    public Queue notificarClientesQueue() {
+        return new Queue(NOTIFICAR_CLIENTES_QUEUE, true);
     }
 
     @Bean
@@ -40,17 +40,4 @@ public class RabbitMQConfig {
     public SimpleMessageConverter simpleMessageConverter() {
         return new SimpleMessageConverter();
     }
-
-    /*
-    public void enviarPostulacion(String mensaje) {
-    rabbitTemplate.convertAndSend(
-        RabbitMQConfig.STUDENTPOSTULATION_QUEUE,
-        mensaje
-    );
-}
-     */
-
-    /*
-
-     */
 }

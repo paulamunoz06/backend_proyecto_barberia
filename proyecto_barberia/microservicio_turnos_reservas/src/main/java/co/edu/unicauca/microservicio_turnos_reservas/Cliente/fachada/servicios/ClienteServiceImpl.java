@@ -34,6 +34,14 @@ public class ClienteServiceImpl implements IClienteService{
         return mapearARespuesta(cliente);
     }
 
+    public String obtenerCorreoPorId(String clienteId) {
+        Cliente cliente = clienteRepository.findById(clienteId)
+                .orElseThrow(() -> new EntidadNoExisteException(
+                        "Cliente no encontrado con ID: " + clienteId));
+
+        return cliente.getEmail();
+    }
+
     @Override
     public ClienteDTORespuesta save(ClienteDTOPeticion clienteDTO) {
         if (clienteRepository.existsById(clienteDTO.getId())) {

@@ -23,6 +23,6 @@ public class Incidencia {
     @JoinColumn(name = "tipoincidencia_id", nullable = false)
     private TipoIncidencia tipoIncidencia;
 
-    @Column(name = "tipoincidencia_descripcion", length = 50, nullable = false)
+    @Column(name = "tipoincidencia_descripcion", length = 100, nullable = false)
     private String descripcion;
 }

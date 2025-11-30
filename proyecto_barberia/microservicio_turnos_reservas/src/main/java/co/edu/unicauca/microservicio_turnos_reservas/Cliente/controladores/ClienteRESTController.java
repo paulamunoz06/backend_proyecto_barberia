@@ -24,6 +24,11 @@ public class ClienteRESTController {
         return ResponseEntity.ok(service.findById(id));
     }
 
+    @GetMapping("/{id}/correo")
+    public ResponseEntity<String> buscarCorreo(@PathVariable String id) {
+        return ResponseEntity.ok(service.obtenerCorreoPorId(id));
+    }
+
     @PostMapping
     public ResponseEntity<ClienteDTORespuesta> crear(@RequestBody ClienteDTOPeticion servicio) {
         return ResponseEntity.ok(service.save(servicio));

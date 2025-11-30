@@ -7,6 +7,10 @@ import co.edu.unicauca.microservicio_catalogo_horario.Barberos.fachada.DTOs.Barb
 import co.edu.unicauca.microservicio_catalogo_horario.Barberos.modelos.Barbero;
 import co.edu.unicauca.microservicio_catalogo_horario.Barberos.modelos.EstadoUsuario;
 import co.edu.unicauca.microservicio_catalogo_horario.Barberos.modelos.Ocupacion;
+import co.edu.unicauca.microservicio_catalogo_horario.Comunicacion.PublicacionEventos.EventPublisher;
+import co.edu.unicauca.microservicio_catalogo_horario.Comunicacion.PublicacionEventos.NotificacionDTO;
+import co.edu.unicauca.microservicio_catalogo_horario.Comunicacion.REST.TurnoDTORespuesta;
+import co.edu.unicauca.microservicio_catalogo_horario.Comunicacion.REST.TurnoServiceClient;
 import co.edu.unicauca.microservicio_catalogo_horario.Excepciones.excepcionesPropias.EntidadNoExisteException;
 import co.edu.unicauca.microservicio_catalogo_horario.Excepciones.excepcionesPropias.EntidadYaExisteException;
 import co.edu.unicauca.microservicio_catalogo_horario.Excepciones.excepcionesPropias.ReglaNegocioExcepcion;
@@ -42,6 +46,12 @@ public class BarberoServiceImpl implements IBarberoService {
 
     @Autowired
     private OcupacionRepository repoOcupacion;
+
+    @Autowired
+    private TurnoServiceClient turnoServiceClient;
+
+    @Autowired
+    private EventPublisher barberoEventPublisher;
 
     @Override
     public List<BarberoDTORespuesta> findAll() {
@@ -126,7 +136,11 @@ public class BarberoServiceImpl implements IBarberoService {
         if (!id.equals(barbero.getId())) {
             throw new RuntimeException("El ID del path no coincide con el ID del barbero");
         }
+
         Barbero existente = repo.findById(id).orElseThrow(() -> new EntidadNoExisteException("El barbero no existe"));
+        if (!Objects.equals(barbero.getId(), existente.getId())) {
+            throw new RuntimeException("No es posible modificar el id del barbero");
+        }
         barbero.setId(existente.getId());
         validarBarbero(barbero);
 
@@ -158,7 +172,6 @@ public class BarberoServiceImpl implements IBarberoService {
         return mapearARespuesta(actualizado);
     }
 
-
     @Override
     @Transactional
     public boolean delete(String id) {
@@ -171,26 +184,26 @@ public class BarberoServiceImpl implements IBarberoService {
         if (barbero.getEstado().equals(EstadoUsuario.INACTIVO)) {
             return false;
         }
-/*
-        //verificar cada barbero, si tiene turnos para ese dia no se puede modificar
-        if(){
 
-        }*/
+        List<TurnoDTORespuesta> tieneTurnosFuturos = turnoServiceClient.obtenerTurnosFuturosBarbero(id);
+        if(!tieneTurnosFuturos.isEmpty()) {
+            barberoEventPublisher.barberoEnviarSolicitudEliminarTurnos(id);
 
-        removerBarberoDeFranjas(barbero);
-        barbero.setEstado(EstadoUsuario.INACTIVO);
-        repo.save(barbero);
-        return true;
-    }
+            for (TurnoDTORespuesta t : tieneTurnosFuturos) {
+                NotificacionDTO notificacion = new NotificacionDTO(turnoServiceClient.obtenerCorreo(t.getBarberoId()),"Estimado usuario, le informamos que uno de los barberos asignados a su reserva no se encuentra disponible para la fecha programada. Le recomendamos reagendar el servicio para garantizar una adecuada atención.");
+                barberoEventPublisher.enviarNotificacionClientes(notificacion);
+            }
+        }
 
-    protected void removerBarberoDeFranjas(Barbero barbero) {
         List<Franja> franjas = repoFranja.findByBarberos_Id(barbero.getId());
-
         for (Franja f : franjas) {
             f.getBarberos().remove(barbero);
         }
-
         repoFranja.saveAll(franjas);
+
+        barbero.setEstado(EstadoUsuario.INACTIVO);
+        repo.save(barbero);
+        return true;
     }
 
     private void validarBarbero(BarberoDTOPeticion barbero) {
@@ -259,8 +272,6 @@ public class BarberoServiceImpl implements IBarberoService {
         if (!repoAdministrador.existsById(barbero.getIdAdministrador())) {
             throw new EntidadNoExisteException("El Administrador con ID " + barbero.getIdAdministrador() + " no existe");
         }
-
-        // 9. Validar sea un estado del enum
     }
 
     public BarberoDTORespuesta mapearARespuesta(Barbero b) {

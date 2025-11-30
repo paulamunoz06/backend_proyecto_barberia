@@ -2,7 +2,9 @@ package co.edu.unicauca.microservicio_turnos_reservas.Turnos.fachada.servicios;
 
 import co.edu.unicauca.microservicio_turnos_reservas.Cliente.accesoADatos.ClienteRepository;
 import co.edu.unicauca.microservicio_turnos_reservas.Cliente.fachada.DTOs.ServicioDTORespuesta;
-import co.edu.unicauca.microservicio_turnos_reservas.Cliente.fachada.servicios.CatalogoServiceClient;
+import co.edu.unicauca.microservicio_turnos_reservas.Comunicacion.PublicacionEventos.EventPublisher;
+import co.edu.unicauca.microservicio_turnos_reservas.Comunicacion.PublicacionEventos.NotificacionDTO;
+import co.edu.unicauca.microservicio_turnos_reservas.Comunicacion.REST.CatalogoServiceClient;
 import co.edu.unicauca.microservicio_turnos_reservas.Cliente.modelos.Cliente;
 import co.edu.unicauca.microservicio_turnos_reservas.Excepciones.excepcionesPropias.EntidadNoExisteException;
 import co.edu.unicauca.microservicio_turnos_reservas.Excepciones.excepcionesPropias.ReglaNegocioExcepcion;
@@ -42,6 +44,9 @@ public class TurnoServiceImpl implements ITurnoService {
     @Autowired
     private CatalogoServiceClient catalogoServiceClient;
 
+    @Autowired
+    private EventPublisher publicadorEventos;
+
     @Override
     public List<TurnoDTORespuesta> findAll() {
         List<Turno> turnos = turnoRepository.findAll();
@@ -65,6 +70,17 @@ public class TurnoServiceImpl implements ITurnoService {
     }
 
     @Override
+    public List<TurnoDTORespuesta> findByBarberoAndFecha(String id, LocalDate fecha) {
+        List<Turno> turnos = turnoRepository.findTurnosActivosByBarberoAndFecha(id,fecha);
+        if (turnos.isEmpty()) {
+            throw new ReglaNegocioExcepcion("No hay turnos para el barbero: " + id + " en la fecha" + fecha);
+        }
+        return turnos.stream()
+                .map(this::mapearARespuesta)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public List<TurnoDTORespuesta> findByReservaId(Integer reservaId) {
         List<Turno> turnos = turnoRepository.findByReservaId(reservaId);
         if (turnos.isEmpty()) {
@@ -80,6 +96,17 @@ public class TurnoServiceImpl implements ITurnoService {
         List<Turno> turnos = turnoRepository.findByBarberoIdAndEstadoActivo(id);
         if (turnos.isEmpty()) {
             throw new ReglaNegocioExcepcion("No hay turnos actualmente para el barbero: " + id);
+        }
+        return turnos.stream()
+                .map(this::mapearARespuesta)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<TurnoDTORespuesta> findByServicioIdActivos(Integer id) {
+        List<Turno> turnos = turnoRepository.findByServicioIdAndEstadoActivo(id);
+        if (turnos.isEmpty()) {
+            throw new ReglaNegocioExcepcion("No hay turnos actualmente para el servicio: " + id);
         }
         return turnos.stream()
                 .map(this::mapearARespuesta)
@@ -163,6 +190,21 @@ public class TurnoServiceImpl implements ITurnoService {
     }
 
     @Override
+    public void turnoClienteNoPresentado(Integer idTurno) {
+        Turno turnoExistente = turnoRepository.findById(idTurno).orElseThrow(() -> new EntidadNoExisteException("Turno no encontrado con ID: " + idTurno));
+        Cliente cliente = repoCliente.getReferenceById(turnoExistente.getCliente().getId());
+
+        Estado estado = repoEstado.findById(4).orElseThrow(() -> new EntidadNoExisteException("Estado no encontrado con ID" ));
+        turnoExistente.setEstado(estado);
+        turnoExistente.setHoraFin(LocalTime.now());
+
+        NotificacionDTO notificacion = new NotificacionDTO(cliente.getEmail(), "Querido cliente, su cita ha sido cancelada debido a que no se presentó en el horario asignado. Fecha y hora del turno: " + turnoExistente.getFechaInicio() + " - " + turnoExistente.getHoraFin() );
+        publicadorEventos.enviarNotificacionCliente(notificacion);
+
+        turnoRepository.save(turnoExistente);
+    }
+
+    @Override
     public LocalTime encontrarHora(String idBarbero, Integer idServicio, LocalDate fechaInicio) {
         ServicioDTORespuesta servicio = catalogoServiceClient.buscarServicio(idServicio);
         int duracionTotal = 10 + servicio.getDuracion() + servicio.getPreparacion();
@@ -216,6 +258,29 @@ public class TurnoServiceImpl implements ITurnoService {
                 ));
 
         return !haySolapamiento;
+    }
+
+    public void eliminarTurnosActivosPorBarbero(String barberoId) {
+        List<Turno> turnosActivos = turnoRepository.findByBarberoIdAndEstadoActivo(barberoId);
+        if (turnosActivos.isEmpty()) {
+            System.out.println("No hay turnos activos para eliminar para el barbero " + barberoId);
+            return;
+        }
+        Estado estado = repoEstado.getReferenceById(3);
+        turnosActivos.forEach(t -> t.setEstado(estado));
+        System.out.println("Se eliminaron " + turnosActivos.size() + " turnos activos del barbero " + barberoId);
+    }
+
+    public void eliminarTurnosActivosPorServicio(Integer servicioId) {
+        List<Turno> turnosActivos = turnoRepository.findByServicioIdAndEstadoActivo(servicioId);
+        if (turnosActivos.isEmpty()) {
+            System.out.println("No hay turnos activos para eliminar para el servicio " + servicioId);
+            return;
+        }
+        Estado estado = repoEstado.getReferenceById(3);
+        turnosActivos.forEach(t -> t.setEstado(estado));
+        turnoRepository.saveAll(turnosActivos);
+        System.out.println("Se eliminaron " + turnosActivos.size() + " turnos activos con el servicio " + servicioId);
     }
 
     private boolean seSolapan(LocalTime inicio1, LocalTime fin1, LocalTime inicio2, LocalTime fin2) {

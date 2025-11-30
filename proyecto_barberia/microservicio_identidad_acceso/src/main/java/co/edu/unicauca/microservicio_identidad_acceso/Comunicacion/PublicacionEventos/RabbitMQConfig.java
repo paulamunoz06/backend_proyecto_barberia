@@ -1,4 +1,4 @@
-package co.edu.unicauca.microservicio_identidad_acceso.PublicacionEventos;
+package co.edu.unicauca.microservicio_identidad_acceso.Comunicacion.PublicacionEventos;
 
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;

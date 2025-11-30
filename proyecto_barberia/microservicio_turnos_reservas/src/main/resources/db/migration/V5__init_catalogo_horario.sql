@@ -47,7 +47,7 @@ CREATE TABLE incidencia (
     incidencia_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     turno_id INT NOT NULL,
     tipoincidencia_id INT NOT NULL,
-    tipoincidencia_descripcion VARCHAR(50) NOT NULL,
+    tipoincidencia_descripcion VARCHAR(100) NOT NULL,
 
     CONSTRAINT fk_incidencia_turno FOREIGN KEY (turno_id) REFERENCES turno(turno_id),
 

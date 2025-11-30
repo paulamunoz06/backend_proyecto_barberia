@@ -35,8 +35,18 @@ public class TurnoRESTController {
     }
 
     @GetMapping("/activas/barbero/{id}")
-    public ResponseEntity<List<TurnoDTORespuesta>> listarBarberoActivos(@PathVariable String id) {
+    public ResponseEntity<List<TurnoDTORespuesta>> listarTurnosActivosPorBarbero(@PathVariable String id) {
         return ResponseEntity.ok(service.findByBarberoIdActivos(id));
+    }
+
+    @GetMapping("/api/turno/activas/barbero/{barberoId}/{fecha}")
+    public ResponseEntity<List<TurnoDTORespuesta>> listarTurnosActivosPorBarberoFecha(@PathVariable String barberoId, @PathVariable LocalDate fecha) {
+        return ResponseEntity.ok(service.findByBarberoAndFecha(barberoId,fecha));
+    }
+
+    @GetMapping("/activas/servicio/{id}")
+    public ResponseEntity<List<TurnoDTORespuesta>> listarTurnosActivosPorServicio(@PathVariable Integer id) {
+        return ResponseEntity.ok(service.findByServicioIdActivos(id));
     }
 
     @GetMapping("/{id}")

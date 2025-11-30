@@ -11,13 +11,13 @@ import co.edu.unicauca.microservicio_catalogo_horario.HorariosLaborales.fachada.
 import co.edu.unicauca.microservicio_catalogo_horario.HorariosLaborales.fachada.DTOs.FranjaHorarioDTORespuesta;
 import co.edu.unicauca.microservicio_catalogo_horario.HorariosLaborales.modelos.Franja;
 import co.edu.unicauca.microservicio_catalogo_horario.HorariosLaborales.modelos.Horario;
+import co.edu.unicauca.microservicio_catalogo_horario.Comunicacion.REST.TurnoServiceClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
 
@@ -37,6 +37,9 @@ public class FranjaHorarioServiceImpl implements IFranjaHorarioService {
 
     @Autowired
     private TurnoServiceClient turnoServiceClient;
+
+    @Autowired
+    private TurnoServiceClient turnoClient;
 
     @Override
     public List<FranjaHorarioDTORespuesta> findHorario(LocalDate horarioId) {
@@ -150,6 +153,15 @@ public class FranjaHorarioServiceImpl implements IFranjaHorarioService {
 
         List<Barbero> nuevosBarberos = new ArrayList<>();
         if (dto.getBarberos() != null) {
+
+            for (String barberoId : dto.getBarberos()) {
+                boolean verificar = turnoClient.tieneTurnosFecha(dto.getHorarioId(),barberoId);
+
+                if (verificar) {
+                    throw new ReglaNegocioExcepcion("No se puede modificar el horario. " + "El barbero " + barberoId + " tiene turnos activos el día " + dto.getHorarioId() + ".");
+                }
+            }
+
             Set<String> idsUnicos = new HashSet<>(dto.getBarberos());
 
             if (idsUnicos.size() > 5) {

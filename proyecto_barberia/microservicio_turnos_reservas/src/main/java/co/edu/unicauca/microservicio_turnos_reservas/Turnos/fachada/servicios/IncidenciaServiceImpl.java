@@ -1,5 +1,6 @@
 package co.edu.unicauca.microservicio_turnos_reservas.Turnos.fachada.servicios;
 
+import co.edu.unicauca.microservicio_turnos_reservas.Comunicacion.PublicacionEventos.EventPublisher;
 import co.edu.unicauca.microservicio_turnos_reservas.Excepciones.excepcionesPropias.EntidadNoExisteException;
 import co.edu.unicauca.microservicio_turnos_reservas.Excepciones.excepcionesPropias.ReglaNegocioExcepcion;
 import co.edu.unicauca.microservicio_turnos_reservas.Turnos.accesoADatos.IncidenciaRepository;
@@ -25,6 +26,9 @@ public class IncidenciaServiceImpl implements IIncidenciaService{
 
     @Autowired
     private TipoIncidenciaRepository repoTipo;
+
+    @Autowired
+    private EventPublisher publicadorEventos;
 
     @Override
     public List<IncidenciaDTORespuesta> findByBarberoId(String id) {

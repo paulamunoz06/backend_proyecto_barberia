@@ -10,6 +10,8 @@ public interface IClienteService {
 
     ClienteDTORespuesta findById(String id);
 
+    String obtenerCorreoPorId(String clienteId);
+
     ClienteDTORespuesta save(ClienteDTOPeticion servicio);
 
     ClienteDTORespuesta update(String id, ClienteDTOPeticion servicio);

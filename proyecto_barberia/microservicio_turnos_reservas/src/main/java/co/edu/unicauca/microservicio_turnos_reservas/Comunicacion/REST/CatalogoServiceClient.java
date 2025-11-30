@@ -1,10 +1,7 @@
-package co.edu.unicauca.microservicio_turnos_reservas.Cliente.fachada.servicios;
+package co.edu.unicauca.microservicio_turnos_reservas.Comunicacion.REST;
 
 import co.edu.unicauca.microservicio_turnos_reservas.Cliente.fachada.DTOs.ServicioDTORespuesta;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.LocalDate;

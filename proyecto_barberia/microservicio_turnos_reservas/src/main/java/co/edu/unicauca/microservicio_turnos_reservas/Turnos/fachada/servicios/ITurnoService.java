@@ -14,7 +14,11 @@ public interface ITurnoService {
 
     List<TurnoDTORespuesta> findByReservaId(Integer reservaId);
 
+    List<TurnoDTORespuesta> findByBarberoAndFecha(String id, LocalDate fecha);
+
     List<TurnoDTORespuesta> findByBarberoIdActivos(String id);
+
+    List<TurnoDTORespuesta> findByServicioIdActivos(Integer id);
 
     TurnoDTORespuesta findById(Integer id);
 
@@ -23,6 +27,8 @@ public interface ITurnoService {
     TurnoDTORespuesta update(Integer id, TurnoDTORespuesta servicio);
 
     TurnoDTORespuesta updateEstado(Integer idTurno, Integer idEstado);
+
+    void turnoClienteNoPresentado(Integer idTurno);
 
     LocalTime encontrarHora(String idBarbero, Integer idServico, LocalDate fechaInicio);
 

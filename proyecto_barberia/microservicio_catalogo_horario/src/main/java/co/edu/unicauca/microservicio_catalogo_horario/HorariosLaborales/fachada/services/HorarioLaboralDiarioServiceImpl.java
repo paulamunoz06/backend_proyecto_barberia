@@ -1,8 +1,11 @@
 package co.edu.unicauca.microservicio_catalogo_horario.HorariosLaborales.fachada.services;
 
+import co.edu.unicauca.microservicio_catalogo_horario.Comunicacion.REST.TurnoDTORespuesta;
+import co.edu.unicauca.microservicio_catalogo_horario.Comunicacion.REST.TurnoServiceClient;
 import co.edu.unicauca.microservicio_catalogo_horario.Excepciones.excepcionesPropias.ReglaNegocioExcepcion;
 import co.edu.unicauca.microservicio_catalogo_horario.HorariosLaborales.accesoADatos.FranjaHorarioRepository;
 import co.edu.unicauca.microservicio_catalogo_horario.HorariosLaborales.accesoADatos.HorarioLaboralDiarioRepository;
+import co.edu.unicauca.microservicio_catalogo_horario.HorariosLaborales.fachada.DTOs.FranjaHorarioDTOPeticion;
 import co.edu.unicauca.microservicio_catalogo_horario.HorariosLaborales.fachada.DTOs.FranjaHorarioDTORespuesta;
 import co.edu.unicauca.microservicio_catalogo_horario.HorariosLaborales.fachada.DTOs.HorarioLaboralDiarioDTOPeticion;
 import co.edu.unicauca.microservicio_catalogo_horario.HorariosLaborales.fachada.DTOs.HorarioLaboralDiarioDTORespuesta;
@@ -34,6 +37,9 @@ public class HorarioLaboralDiarioServiceImpl implements IHorarioLaboralDiarioSer
 
     @Autowired
     private FranjaHorarioServiceImpl franjaService;
+
+    @Autowired
+    private TurnoServiceClient turnoClient;
 
     @Override
     public HorarioLaboralDiarioDTORespuesta findById(LocalDate fecha) {
@@ -115,10 +121,17 @@ public class HorarioLaboralDiarioServiceImpl implements IHorarioLaboralDiarioSer
             throw new ReglaNegocioExcepcion("No se pueden modificar horarios en fechas anteriores a hoy.");
         }
 
-      /*  //verificar cada barbero, si tiene turnos para ese dia no se puede modificar
-        if(){
+        for (FranjaHorarioDTORespuesta franja : horario.getFranjas()) {
+            if (franja.getBarberos() != null) {
+                for (String barberoId : franja.getBarberos()) {
+                    boolean verificar = turnoClient.tieneTurnosFecha(fecha,barberoId);
 
-        }*/
+                    if (verificar) {
+                        throw new ReglaNegocioExcepcion("No se puede modificar el horario. " + "El barbero " + barberoId + " tiene turnos activos el día " + fecha + ".");
+                    }
+                }
+            }
+        }
 
         Horario existente = repoHorario.findById(fecha).orElseThrow(() -> new ReglaNegocioExcepcion("No existe un horario laboral diario con fecha: " + fecha));
         Administrador admin = repoAdmin.findById(horario.getIdAdministrador()).orElseThrow(() -> new ReglaNegocioExcepcion("No existe el administrador con ID: " + horario.getIdAdministrador()));
