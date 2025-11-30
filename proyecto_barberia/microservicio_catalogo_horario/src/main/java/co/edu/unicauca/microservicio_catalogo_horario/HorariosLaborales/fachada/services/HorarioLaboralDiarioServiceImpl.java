@@ -115,6 +115,11 @@ public class HorarioLaboralDiarioServiceImpl implements IHorarioLaboralDiarioSer
             throw new ReglaNegocioExcepcion("No se pueden modificar horarios en fechas anteriores a hoy.");
         }
 
+      /*  //verificar cada barbero, si tiene turnos para ese dia no se puede modificar
+        if(){
+
+        }*/
+
         Horario existente = repoHorario.findById(fecha).orElseThrow(() -> new ReglaNegocioExcepcion("No existe un horario laboral diario con fecha: " + fecha));
         Administrador admin = repoAdmin.findById(horario.getIdAdministrador()).orElseThrow(() -> new ReglaNegocioExcepcion("No existe el administrador con ID: " + horario.getIdAdministrador()));
         existente.setAdministrador(admin);

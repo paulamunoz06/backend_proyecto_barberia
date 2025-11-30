@@ -21,7 +21,7 @@ public class BarberoRESTController {
     }
 
     @GetMapping("/activos")
-    public ResponseEntity<List<BarberoDTORespuesta>> listarEstado() {
+    public ResponseEntity<List<BarberoDTORespuesta>> listarActivos() {
         return ResponseEntity.ok(service.findActive());
     }
 
@@ -43,6 +43,11 @@ public class BarberoRESTController {
     @PutMapping("/{id}")
     public ResponseEntity<BarberoDTORespuesta> actualizar(@PathVariable String id, @RequestBody BarberoDTOPeticion barbero) {
         return ResponseEntity.ok(service.update(id, barbero));
+    }
+
+    @PutMapping("/{idBarbero}/ocupacion/{ocupacionNombre}")
+    public ResponseEntity<BarberoDTORespuesta> actualizarOcupacion(@PathVariable String idBarbero, @PathVariable String ocupacionNombre) {
+        return ResponseEntity.ok(service.updateOcupacion(idBarbero, ocupacionNombre));
     }
 
     @DeleteMapping("/{id}")

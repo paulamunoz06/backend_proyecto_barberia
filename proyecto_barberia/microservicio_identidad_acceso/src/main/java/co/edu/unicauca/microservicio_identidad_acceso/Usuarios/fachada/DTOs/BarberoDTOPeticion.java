@@ -11,7 +11,6 @@ import java.util.List;
 @Setter
 @ToString
 public class BarberoDTOPeticion {
-
     private String nombre;
     private String id;
     private LocalDate nacimiento;
@@ -21,6 +20,4 @@ public class BarberoDTOPeticion {
     private String email;
     private String fotografia;
     private String idAdministrador;
-    private Integer ocupacion;
-
 }

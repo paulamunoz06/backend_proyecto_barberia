@@ -3,6 +3,7 @@ package co.edu.unicauca.microservicio_catalogo_horario.HorariosLaborales.fachada
 import co.edu.unicauca.microservicio_catalogo_horario.Barberos.accesoADatos.BarberoRepository;
 import co.edu.unicauca.microservicio_catalogo_horario.Barberos.fachada.services.BarberoServiceImpl;
 import co.edu.unicauca.microservicio_catalogo_horario.Barberos.modelos.Barbero;
+import co.edu.unicauca.microservicio_catalogo_horario.Excepciones.excepcionesPropias.EntidadNoExisteException;
 import co.edu.unicauca.microservicio_catalogo_horario.Excepciones.excepcionesPropias.ReglaNegocioExcepcion;
 import co.edu.unicauca.microservicio_catalogo_horario.HorariosLaborales.accesoADatos.FranjaHorarioRepository;
 import co.edu.unicauca.microservicio_catalogo_horario.HorariosLaborales.accesoADatos.HorarioLaboralDiarioRepository;
@@ -34,6 +35,9 @@ public class FranjaHorarioServiceImpl implements IFranjaHorarioService {
     @Autowired
     private BarberoServiceImpl barberoService;
 
+    @Autowired
+    private TurnoServiceClient turnoServiceClient;
+
     @Override
     public List<FranjaHorarioDTORespuesta> findHorario(LocalDate horarioId) {
         if (!repoHorario.existsById(horarioId)) {
@@ -64,6 +68,10 @@ public class FranjaHorarioServiceImpl implements IFranjaHorarioService {
 
     @Transactional(readOnly = true)
     public List<FranjaHorarioDTORespuesta> findBarberoDesdeHora(String barberoId, LocalDate fecha, LocalTime hora) {
+        if (!repoBarbero.existsById(barberoId)) {
+            throw new EntidadNoExisteException("El barbero con ID " + barberoId + " no existe");
+        }
+
         if(!repoFranja.existsByBarberoAndHorario(barberoId,fecha)){
             return null;
         }
@@ -80,34 +88,25 @@ public class FranjaHorarioServiceImpl implements IFranjaHorarioService {
     }
 
     @Override
+    public Boolean verificarBarberoDesdeHora(String barberoId, LocalDate fecha, LocalTime hora) {
+        if(findBarberoDesdeHora(barberoId,fecha,hora) == null) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
     @Transactional(readOnly = true)
-        public boolean tieneDuracionContinua(String barberoId, LocalDate fecha, LocalTime horaInicio, LocalTime horaFin) {
-        if(!repoFranja.existsByBarberoAndHorario(barberoId,fecha)){
+    public boolean tieneDuracionContinua(String barberoId, LocalDate fecha, LocalTime horaInicio, LocalTime horaFin) {
+        boolean disponibleEnFranjas = verificarDisponibilidadEnFranjas(barberoId, fecha, horaInicio, horaFin);
+
+        if (!disponibleEnFranjas) {
             return false;
         }
 
-        List<Franja> franjas = repoFranja.findFranjasBarberoDesde(barberoId, fecha, LocalTime.MIN)
-                .stream()
-                .filter(f -> f.getHorario().getId().equals(fecha))
-                .sorted(Comparator.comparing(Franja::getHoraInicio))
-                .toList();
-        if (franjas.isEmpty()) {
-            return false;
-        }
+        boolean sinConflictos = turnoServiceClient.verificarDisponibilidadBarbero(barberoId, fecha, horaInicio, horaFin);
 
-        LocalTime tiempoActual = horaInicio;
-        for (Franja f : franjas) {
-            if (f.getHoraInicio().isAfter(tiempoActual)) {
-                return false;
-            }
-            if (!f.getHoraFin().isBefore(tiempoActual)) {
-                tiempoActual = f.getHoraFin();
-            }
-            if (!tiempoActual.isBefore(horaFin)) {
-                return true;
-            }
-        }
-        return false;
+        return sinConflictos;
     }
 
     @Override
@@ -208,7 +207,6 @@ public class FranjaHorarioServiceImpl implements IFranjaHorarioService {
         return dto;
     }
 
-
     private void validarFranja(LocalDate horarioId, LocalTime inicio, LocalTime fin, Integer idIgnorar) {
         // Validación de orden
         if (!inicio.isBefore(fin)) {
@@ -241,5 +239,43 @@ public class FranjaHorarioServiceImpl implements IFranjaHorarioService {
         if (solapa) {
             throw new ReglaNegocioExcepcion("La franja " + inicio + " - " + fin + " se superpone con otra existente.");
         }
+    }
+
+    private boolean verificarDisponibilidadEnFranjas(String barberoId, LocalDate fecha, LocalTime horaInicio, LocalTime horaFin) {
+        if (!repoFranja.existsByBarberoAndHorario(barberoId, fecha)) {
+            return false;
+        }
+
+        List<Franja> franjas = repoFranja.findFranjasBarberoDesde(barberoId, fecha, LocalTime.MIN)
+                .stream()
+                .filter(f -> f.getHorario().getId().equals(fecha))
+                .sorted(Comparator.comparing(Franja::getHoraInicio))
+                .toList();
+
+        if (franjas.isEmpty()) {
+            return false;
+        }
+
+        LocalTime tiempoActual = horaInicio;
+
+        for (Franja franja : franjas) {
+            if (franja.getHoraFin().isBefore(tiempoActual)) {
+                continue;
+            }
+
+            if (franja.getHoraInicio().isAfter(tiempoActual)) {
+                return false;
+            }
+
+            if (franja.getHoraFin().isAfter(tiempoActual)) {
+                tiempoActual = franja.getHoraFin();
+            }
+
+            if (!tiempoActual.isBefore(horaFin)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

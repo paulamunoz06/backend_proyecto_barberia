@@ -1,7 +1,15 @@
 package co.edu.unicauca.microservicio_turnos_reservas.Cliente.fachada.servicios;
 
+import co.edu.unicauca.microservicio_turnos_reservas.Cliente.fachada.DTOs.ServicioDTORespuesta;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.reactive.function.client.WebClient;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Component
 public class CatalogoServiceClient {
@@ -39,6 +47,39 @@ public class CatalogoServiceClient {
         } catch (Exception e) {
             System.err.println("Error validando servicio: " + e.getMessage());
             return false;
+        }
+    }
+
+    public boolean validarTrabajoDiaBarbero(String id, LocalDateTime horaInicioBusqueda) {
+        Boolean resultado = webClient.post()
+                .uri("/api/franja/barbero/{id}/{horaInicio}", id, horaInicioBusqueda)
+                .retrieve()
+                .bodyToMono(Boolean.class)
+                .onErrorReturn(false)
+                .block();
+        return resultado;
+    }
+
+    public boolean validarDuracionContinua(String id, LocalDate fecha, LocalTime inicio, LocalTime fin) {
+        Boolean resultado = webClient.post()
+                .uri("/barbero/{id}/{fecha}/{inicio}/{fin}", id, fecha, inicio,fin)
+                .retrieve()
+                .bodyToMono(Boolean.class)
+                .onErrorReturn(false)
+                .block();
+        return resultado;
+    }
+
+    public ServicioDTORespuesta buscarServicio(Integer servicioId) {
+        try {
+            return webClient.get()
+                    .uri("/api/servicio/{id}", servicioId)
+                    .retrieve()
+                    .bodyToMono(ServicioDTORespuesta.class)
+                    .block();
+        } catch (Exception e) {
+            System.err.println("Error consultando servicio " + servicioId + ": " + e.getMessage());
+            return null;
         }
     }
 }

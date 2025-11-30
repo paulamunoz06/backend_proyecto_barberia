@@ -74,7 +74,6 @@ public class UsuarioServiceImpl implements IUsuarioService {
         destino.setFotografia(origen.getFotografia());
         destino.setIdAdministrador(origen.getIdAdministrador());
         destino.setEstado("ACTIVO");
-        destino.setOcupacion(3);
 
         return destino;
     }

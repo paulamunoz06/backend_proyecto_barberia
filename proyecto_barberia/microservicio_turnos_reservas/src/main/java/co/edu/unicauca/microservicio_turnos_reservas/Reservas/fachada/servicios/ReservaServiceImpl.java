@@ -84,9 +84,14 @@ public class ReservaServiceImpl implements IReservaService{
                 turno.setServicioId(turnoDTO.getServicioId());
                 turno.setBarberoId(turnoDTO.getBarberoId());
                 turno.setDescripcion(turnoDTO.getDescripcion());
-                turno.setFechaInicio(turnoDTO.getFechaInicio());
+                turno.setFechaInicio(reservaDTO.getFechaReserva());
                 turno.setHoraInicio(turnoDTO.getHoraInicio());
-                turno.setHoraFin(10 + servicio.getDuracion() + servicio.getPreparacion());
+                if(turnoDTO.getHoraFin() != null) {
+                    turno.setHoraFin(turnoDTO.getHoraFin());
+                }
+                else{
+                    turno.setHoraFin(serviceTurno.calcularHoraFin(turno.getHoraInicio(),turno.getServicioId()));
+                }
 
                 Estado estado = repoEstado.findById(1).orElseThrow(() -> new EntidadNoExisteException("Estado no encontrado"));
                 turno.setEstado(estado);
@@ -117,13 +122,11 @@ public class ReservaServiceImpl implements IReservaService{
 
         if (reservaDTO.getTurnos() != null && !reservaDTO.getTurnos().isEmpty()) {
             for (TurnoDTORespuesta turnoDTO : reservaDTO.getTurnos()) {
-                if(turnoDTO.getFechaInicio() != reservaDTO.getFechaReserva()) {
-                    throw new ReglaNegocioExcepcion("La fecha del turno debe ser igual a la fecha del turno");
-                }
+
                 TurnoDTOPeticion turnoValidar = new TurnoDTOPeticion();
                 turnoValidar.setBarberoId(turnoDTO.getBarberoId());
                 turnoValidar.setServicioId(turnoDTO.getServicioId());
-                turnoValidar.setFechaInicio(turnoDTO.getFechaInicio());
+                turnoValidar.setFechaInicio(reservaDTO.getFechaReserva());
                 turnoValidar.setHoraInicio(turnoDTO.getHoraInicio());
                 serviceTurno.validarTurno(turnoValidar);
 
@@ -134,6 +137,13 @@ public class ReservaServiceImpl implements IReservaService{
                 turno.setDescripcion(turnoDTO.getDescripcion());
                 turno.setFechaInicio(turnoDTO.getFechaInicio());
                 turno.setHoraInicio(turnoDTO.getHoraInicio());
+                if(turnoDTO.getHoraFin() != null) {
+                    turno.setHoraFin(turnoDTO.getHoraFin());
+                }
+                else{
+                    turno.setHoraFin(serviceTurno.calcularHoraFin(turno.getHoraInicio(),turno.getServicioId()));
+                }
+
 
                 Estado estado = repoEstado.findById(1).orElseThrow(() -> new EntidadNoExisteException("Estado no encontrado"));
                 turno.setEstado(estado);

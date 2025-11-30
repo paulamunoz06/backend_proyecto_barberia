@@ -4,10 +4,14 @@ import co.edu.unicauca.microservicio_turnos_reservas.Turnos.fachada.DTOs.TurnoDT
 import co.edu.unicauca.microservicio_turnos_reservas.Turnos.fachada.DTOs.TurnoDTORespuesta;
 import co.edu.unicauca.microservicio_turnos_reservas.Turnos.fachada.servicios.ITurnoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/turno")
@@ -60,5 +64,13 @@ public class TurnoRESTController {
         return ResponseEntity.ok(service.delete(id));
     }
 
+    @GetMapping("/barbero/{barberoId}/disponibilidad")
+    public ResponseEntity<Boolean> verificarDisponibilidadBarbero(
+            @PathVariable String barberoId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) LocalTime horaInicio,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) LocalTime horaFin) {
+        return ResponseEntity.ok(service.verificarDisponibilidadBarbero(barberoId, fecha, horaInicio, horaFin));
+    }
 }
 

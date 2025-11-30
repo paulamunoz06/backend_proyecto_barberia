@@ -18,6 +18,7 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.TreeMap;
 
 @Service
 public class AsignarPreferencia implements AsignarBarbero {
@@ -47,7 +48,7 @@ public class AsignarPreferencia implements AsignarBarbero {
         while (!horaBaseInicio.isAfter(horaFinJornada)) {
             BarberoFranjaDTORespuesta respuesta = new BarberoFranjaDTORespuesta();
             respuesta.setBarberoIds(new ArrayList<>());
-            respuesta.setFranjas(new HashMap<>());
+            respuesta.setFranjas(new TreeMap<>());
 
             LocalTime horaInicio = horaBaseInicio;
             boolean falloEnCadena = false;

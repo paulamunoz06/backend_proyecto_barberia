@@ -119,6 +119,12 @@ public class ServicioServiceImpl implements IServicioService {
             s.getBarberos().clear();
         }
 
+/*
+        //verificar cada barbero, si tiene turnos para ese servicioese dia envia al micro se notificaciones
+        if(){
+
+        }*/
+
         repo.delete(s);
         return true;
     }

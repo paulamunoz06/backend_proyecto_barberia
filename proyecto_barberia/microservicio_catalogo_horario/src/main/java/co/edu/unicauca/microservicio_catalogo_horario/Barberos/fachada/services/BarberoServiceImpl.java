@@ -1,6 +1,7 @@
 package co.edu.unicauca.microservicio_catalogo_horario.Barberos.fachada.services;
 
 import co.edu.unicauca.microservicio_catalogo_horario.Barberos.accesoADatos.BarberoRepository;
+import co.edu.unicauca.microservicio_catalogo_horario.Barberos.accesoADatos.OcupacionRepository;
 import co.edu.unicauca.microservicio_catalogo_horario.Barberos.fachada.DTOs.BarberoDTOPeticion;
 import co.edu.unicauca.microservicio_catalogo_horario.Barberos.fachada.DTOs.BarberoDTORespuesta;
 import co.edu.unicauca.microservicio_catalogo_horario.Barberos.modelos.Barbero;
@@ -39,6 +40,9 @@ public class BarberoServiceImpl implements IBarberoService {
     @Autowired
     private FranjaHorarioRepository repoFranja;
 
+    @Autowired
+    private OcupacionRepository repoOcupacion;
+
     @Override
     public List<BarberoDTORespuesta> findAll() {
         List<Barbero> barberos = repo.findAll();
@@ -69,7 +73,7 @@ public class BarberoServiceImpl implements IBarberoService {
         if (!repoServicio.existsById(servicioId)) {
             throw new EntidadNoExisteException("El servicio con ID " + servicioId + " no existe");
         }
-        List<Barbero> barberos = repo.findByServiciosEspecializados_Id(servicioId);
+        List<Barbero> barberos = repo.findBarberosActivosByServicioId(servicioId);
         if(barberos.isEmpty()){
             throw new ReglaNegocioExcepcion("No hay barberos capacitados para este servicio actualmente");
         }
@@ -110,6 +114,8 @@ public class BarberoServiceImpl implements IBarberoService {
         }
         validarBarbero(barbero);
         Barbero entidad = mapearAPersistencia(barbero);
+        Ocupacion ocupacion = repoOcupacion.getReferenceById(3);
+        entidad.setOcupacion(ocupacion);
         Barbero guardado = repo.save(entidad);
         return mapearARespuesta(guardado);
     }
@@ -124,6 +130,8 @@ public class BarberoServiceImpl implements IBarberoService {
         barbero.setId(existente.getId());
         validarBarbero(barbero);
 
+        Ocupacion ocupacion = repoOcupacion.getReferenceById(3);
+        existente.setOcupacion(ocupacion);
         existente.setNombre(barbero.getNombre());
         existente.setEmail(barbero.getEmail());
         existente.setTelefono(barbero.getTelefono());
@@ -142,17 +150,32 @@ public class BarberoServiceImpl implements IBarberoService {
     }
 
     @Override
+    public BarberoDTORespuesta updateOcupacion(String id, String ocupacionNombre) {
+        Barbero barbero = repo.findById(id).orElseThrow(() -> new RuntimeException("El barbero con id " + id + " no existe"));
+        Ocupacion ocupacion = repoOcupacion.findByNombre(ocupacionNombre).orElseThrow(() -> new RuntimeException("La ocupación '" + ocupacionNombre + "' no existe"));
+        barbero.setOcupacion(ocupacion);
+        Barbero actualizado = repo.save(barbero);
+        return mapearARespuesta(actualizado);
+    }
+
+
+    @Override
     @Transactional
     public boolean delete(String id) {
         if (id == null) {
-            throw new ReglaNegocioExcepcion("ERROR001: El ID es obligatorio");
+            throw new ReglaNegocioExcepcion("El ID es obligatorio");
         }
 
-        Barbero barbero = repo.findById(id).orElseThrow(() -> new EntidadNoExisteException("ERROR009: El barbero no existe"));
+        Barbero barbero = repo.findById(id).orElseThrow(() -> new EntidadNoExisteException("El barbero no existe"));
 
         if (barbero.getEstado().equals(EstadoUsuario.INACTIVO)) {
             return false;
         }
+/*
+        //verificar cada barbero, si tiene turnos para ese dia no se puede modificar
+        if(){
+
+        }*/
 
         removerBarberoDeFranjas(barbero);
         barbero.setEstado(EstadoUsuario.INACTIVO);
@@ -248,7 +271,7 @@ public class BarberoServiceImpl implements IBarberoService {
         dto.setTelefono(b.getTelefono());
         dto.setEstado(b.getEstado().toString());
         dto.setNacimiento(b.getNacimiento());
-        dto.setOcupacion(b.getOcupacion().getId());
+        dto.setOcupacion(b.getOcupacion().getNombre());
         dto.setFotografia(b.getFotografia());
         List<Integer> idsServicios = b.getServiciosEspecializados()
                 .stream()
@@ -269,7 +292,6 @@ public class BarberoServiceImpl implements IBarberoService {
         b.setEstado(EstadoUsuario.valueOf(dto.getEstado()));
         b.setNacimiento(dto.getNacimiento());
         b.setFotografia(dto.getFotografia());
-        b.setOcupacion(new Ocupacion(dto.getOcupacion()));
         List<Servicio> servicios = new ArrayList<>();
         for (Integer idServicio : dto.getServicios()) {
             Servicio s = servicioService.findByIdInt(idServicio);

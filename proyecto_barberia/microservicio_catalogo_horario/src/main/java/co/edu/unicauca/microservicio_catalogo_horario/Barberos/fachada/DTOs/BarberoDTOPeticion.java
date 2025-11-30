@@ -31,6 +31,4 @@ public class BarberoDTOPeticion {
 
     private String idAdministrador;
 
-    private Integer ocupacion;
-
 }

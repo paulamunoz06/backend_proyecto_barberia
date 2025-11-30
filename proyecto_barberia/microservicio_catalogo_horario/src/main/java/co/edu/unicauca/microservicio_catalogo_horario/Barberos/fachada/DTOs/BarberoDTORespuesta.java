@@ -17,7 +17,7 @@ public class BarberoDTORespuesta {
 
     private String id;
 
-    private Integer ocupacion;
+    private String ocupacion;
 
     private String nombre;
 

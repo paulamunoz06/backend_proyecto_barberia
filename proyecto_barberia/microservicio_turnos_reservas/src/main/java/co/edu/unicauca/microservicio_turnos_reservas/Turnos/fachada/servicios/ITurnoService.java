@@ -24,8 +24,9 @@ public interface ITurnoService {
 
     TurnoDTORespuesta updateEstado(Integer idTurno, Integer idEstado);
 
-    LocalTime encontrarHora(String idBarbero, LocalDate fechaInicio);
+    LocalTime encontrarHora(String idBarbero, Integer idServico, LocalDate fechaInicio);
 
     boolean delete(Integer id);
 
+    boolean verificarDisponibilidadBarbero(String barberoId, LocalDate fecha, LocalTime horaInicio, LocalTime horaFin);
 }

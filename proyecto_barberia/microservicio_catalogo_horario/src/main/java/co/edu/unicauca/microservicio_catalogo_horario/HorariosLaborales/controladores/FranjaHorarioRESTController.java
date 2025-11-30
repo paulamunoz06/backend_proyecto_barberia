@@ -36,6 +36,11 @@ public class FranjaHorarioRESTController {
         return ResponseEntity.ok(service.findBarberoDesdeHora(id, horaInicioBusqueda.toLocalDate(), horaInicioBusqueda.toLocalTime()));
     }
 
+    @PostMapping("/barbero/{id}/{horaInicioBusqueda}")
+    public ResponseEntity<Boolean> verificarBarberoDesdeHora(@PathVariable String id, @PathVariable LocalDateTime horaInicioBusqueda) {
+        return ResponseEntity.ok(service.verificarBarberoDesdeHora(id, horaInicioBusqueda.toLocalDate(), horaInicioBusqueda.toLocalTime()));
+    }
+
     @GetMapping("/barbero/{id}/{fecha}/{inicio}/{fin}")
     public ResponseEntity<Boolean> duracionContinua(@PathVariable String id, @PathVariable LocalDate fecha, @PathVariable LocalTime inicio, @PathVariable LocalTime fin) {
         return ResponseEntity.ok(service.tieneDuracionContinua(id,fecha,inicio,fin));

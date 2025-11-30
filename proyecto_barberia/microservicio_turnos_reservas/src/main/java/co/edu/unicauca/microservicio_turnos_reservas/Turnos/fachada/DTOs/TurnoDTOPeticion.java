@@ -15,5 +15,6 @@ public class TurnoDTOPeticion {
     private String barberoId;
     private String descripcion;
     private LocalDate fechaInicio;
-    private LocalTime HoraInicio;
+    private LocalTime horaInicio;
+    private LocalTime horaFin;
 }

@@ -17,6 +17,6 @@ public class TurnoDTORespuesta {
     private Integer estado;
     private String descripcion;
     private LocalDate fechaInicio;
-    private LocalTime HoraInicio;
-    private LocalTime HoraFin;
+    private LocalTime horaInicio;
+    private LocalTime horaFin;
 }

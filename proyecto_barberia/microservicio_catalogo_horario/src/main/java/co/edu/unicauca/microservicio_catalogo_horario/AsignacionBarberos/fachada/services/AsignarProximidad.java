@@ -44,7 +44,7 @@ public class AsignarProximidad implements AsignarBarbero {
         while (!horaBaseInicio.isAfter(horaFinJornada)) {
             BarberoFranjaDTORespuesta respuesta = new BarberoFranjaDTORespuesta();
             respuesta.setBarberoIds(new ArrayList<>());
-            respuesta.setFranjas(new HashMap<>());
+            respuesta.setFranjas(new TreeMap<>());
 
             LocalTime horaInicio = horaBaseInicio;
             boolean falloEnCadena = false;

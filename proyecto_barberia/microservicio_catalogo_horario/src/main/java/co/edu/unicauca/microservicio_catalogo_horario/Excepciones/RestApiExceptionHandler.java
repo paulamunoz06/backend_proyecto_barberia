@@ -24,7 +24,7 @@ public class RestApiExceptionHandler {
     public ResponseEntity<Error> handleGenericException(final HttpServletRequest req, final Exception ex, final Locale locale) {
         final Error error = ErrorUtils
                 .crearError(CodigoError.ERROR_GENERICO.getCodigo(),
-                        CodigoError.ERROR_GENERICO.getLlaveMensaje()+ex.toString(),
+                        ex.getMessage(),
                         HttpStatus.INTERNAL_SERVER_ERROR.value())
                 .setUrl(req.getRequestURL().toString()).setMetodo(req.getMethod());
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -34,7 +34,7 @@ public class RestApiExceptionHandler {
     public ResponseEntity<Error> handleIoException(final HttpServletRequest req, final RuntimeException ex, final Locale locale) {
         final Error error = ErrorUtils
                 .crearError(CodigoError.ERROR_GENERICO.getCodigo(),
-                        CodigoError.ERROR_GENERICO.getLlaveMensaje()+ex.toString(),
+                        ex.getMessage(),
                         HttpStatus.INTERNAL_SERVER_ERROR.value())
                 .setUrl(req.getRequestURL().toString()).setMetodo(req.getMethod());
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -44,7 +44,7 @@ public class RestApiExceptionHandler {
     public ResponseEntity<Error> handleGenericException(final HttpServletRequest req, final EntidadYaExisteException ex) {
         final Error error = ErrorUtils
                 .crearError(CodigoError.ENTIDAD_YA_EXISTE.getCodigo(),
-                        ex.toString(),
+                        ex.getLlaveMensaje(),
                         HttpStatus.NOT_ACCEPTABLE.value())
                 .setUrl(req.getRequestURL().toString()).setMetodo(req.getMethod());
         return new ResponseEntity<>(error, HttpStatus.NOT_ACCEPTABLE);
@@ -54,7 +54,7 @@ public class RestApiExceptionHandler {
     public ResponseEntity<Error> handleGenericException(final HttpServletRequest req, final ReglaNegocioExcepcion ex, final Locale locale) {
         final Error error = ErrorUtils
                 .crearError(CodigoError.VIOLACION_REGLA_DE_NEGOCIO.getCodigo(),
-                        ex.toString(),
+                        ex.getLlaveMensaje(),
                         HttpStatus.BAD_REQUEST.value())
                 .setUrl(req.getRequestURL().toString()).setMetodo(req.getMethod());
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
@@ -64,7 +64,7 @@ public class RestApiExceptionHandler {
     public ResponseEntity<Error> handleGenericException(final HttpServletRequest req, final EntidadNoExisteException ex, final Locale locale) {
         final Error error = ErrorUtils
                 .crearError(CodigoError.ENTIDAD_NO_ENCONTRADA.getCodigo(),
-                        ex.toString(),
+                        ex.getLlaveMensaje(),
                         HttpStatus.NOT_FOUND.value())
                 .setUrl(req.getRequestURL().toString()).setMetodo(req.getMethod());
         return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);

@@ -15,7 +15,7 @@ public class CategoriaRESTController {
     @Autowired
     private ICategoriaService categoriaService;
 
-    @GetMapping("/categorias")
+    @GetMapping
     public List<CategoriaDTORespuesta> listarCategorias() {
         return categoriaService.findAll();
     }

@@ -16,6 +16,8 @@ public interface IFranjaHorarioService {
 
     List<FranjaHorarioDTORespuesta> findBarberoDesdeHora(String barberoId, LocalDate fecha, LocalTime hora);
 
+    Boolean verificarBarberoDesdeHora(String barberoId, LocalDate fecha, LocalTime hora);
+
     boolean tieneDuracionContinua(String barberoId, LocalDate fecha, LocalTime horaInicio, LocalTime horaFin);
 
     FranjaHorarioDTORespuesta findById(Integer id);

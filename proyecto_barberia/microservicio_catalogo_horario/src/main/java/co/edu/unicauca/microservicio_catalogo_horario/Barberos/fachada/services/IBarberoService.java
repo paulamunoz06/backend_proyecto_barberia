@@ -23,6 +23,8 @@ public interface IBarberoService {
 
     BarberoDTORespuesta update(String id, BarberoDTOPeticion barbero);
 
+    BarberoDTORespuesta updateOcupacion(String id, String ocupacionId);
+
     boolean delete(String id);
 
 

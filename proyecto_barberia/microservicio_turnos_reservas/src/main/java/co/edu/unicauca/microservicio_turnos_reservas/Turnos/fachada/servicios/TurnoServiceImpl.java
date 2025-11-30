@@ -1,6 +1,7 @@
 package co.edu.unicauca.microservicio_turnos_reservas.Turnos.fachada.servicios;
 
 import co.edu.unicauca.microservicio_turnos_reservas.Cliente.accesoADatos.ClienteRepository;
+import co.edu.unicauca.microservicio_turnos_reservas.Cliente.fachada.DTOs.ServicioDTORespuesta;
 import co.edu.unicauca.microservicio_turnos_reservas.Cliente.fachada.servicios.CatalogoServiceClient;
 import co.edu.unicauca.microservicio_turnos_reservas.Cliente.modelos.Cliente;
 import co.edu.unicauca.microservicio_turnos_reservas.Excepciones.excepcionesPropias.EntidadNoExisteException;
@@ -15,8 +16,11 @@ import co.edu.unicauca.microservicio_turnos_reservas.Turnos.modelos.Estado;
 import co.edu.unicauca.microservicio_turnos_reservas.Turnos.modelos.Turno;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -37,9 +41,6 @@ public class TurnoServiceImpl implements ITurnoService {
 
     @Autowired
     private CatalogoServiceClient catalogoServiceClient;
-
-    @Autowired
-    private TurnoDinamico turnoDinamico;
 
     @Override
     public List<TurnoDTORespuesta> findAll() {
@@ -105,11 +106,13 @@ public class TurnoServiceImpl implements ITurnoService {
         Turno turno = mapearAPersistencia(turnoDTO);
         turno.setCliente(cliente);
         turno.setEstado(estado);
+        if (turnoDTO.getHoraInicio() == null) {
+            turno.setHoraInicio(encontrarHora(turnoDTO.getBarberoId(),turnoDTO.getServicioId(),turnoDTO.getFechaInicio()));
+            turno.setHoraFin(calcularHoraFin(turnoDTO.getHoraInicio(),turnoDTO.getServicioId()));
 
-        if (turnoDTO.getHoraInicio() != null) {
-            turno.setHoraInicio(encontrarHora(turnoDTO.getBarberoId(),turnoDTO.getFechaInicio()));
         }else {
             turno.setHoraInicio(turnoDTO.getHoraInicio());
+            turno.setHoraFin(turnoDTO.getHoraFin());
         }
 
         Turno turnoGuardado = turnoRepository.save(turno);
@@ -123,6 +126,7 @@ public class TurnoServiceImpl implements ITurnoService {
         turnoDTOValidacion.setServicioId(turnoDTO.getServicioId());
         turnoDTOValidacion.setFechaInicio(turnoDTO.getFechaInicio());
         turnoDTOValidacion.setHoraInicio(turnoDTO.getHoraInicio());
+        turnoDTOValidacion.setHoraFin(turnoDTO.getHoraFin());
 
         validarTurno(turnoDTOValidacion);
 
@@ -137,10 +141,12 @@ public class TurnoServiceImpl implements ITurnoService {
         turnoExistente.setEstado(estado);
         turnoExistente.setDescripcion(turnoDTO.getDescripcion());
         turnoExistente.setFechaInicio(turnoDTO.getFechaInicio());
-        if (turnoDTOValidacion.getHoraInicio() != null) {
-            turnoExistente.setHoraInicio(encontrarHora(turnoDTO.getBarberoId(),turnoDTO.getFechaInicio()));
+        if (turnoDTOValidacion.getHoraInicio() == null) {
+            turnoExistente.setHoraInicio(encontrarHora(turnoDTO.getBarberoId(), turnoDTO.getServicioId(),turnoDTO.getFechaInicio()));
+            turnoExistente.setHoraFin(calcularHoraFin(turnoExistente.getHoraInicio(), turnoDTO.getServicioId()));
         }else {
             turnoExistente.setHoraInicio(turnoDTOValidacion.getHoraInicio());
+            turnoExistente.setHoraFin(turnoDTOValidacion.getHoraFin());
         }
 
         Turno turnoActualizado = turnoRepository.save(turnoExistente);
@@ -157,8 +163,30 @@ public class TurnoServiceImpl implements ITurnoService {
     }
 
     @Override
-    public LocalTime encontrarHora(String idBarbero, LocalDate fechaInicio) {
-        return null;
+    public LocalTime encontrarHora(String idBarbero, Integer idServicio, LocalDate fechaInicio) {
+        ServicioDTORespuesta servicio = catalogoServiceClient.buscarServicio(idServicio);
+        int duracionTotal = 10 + servicio.getDuracion() + servicio.getPreparacion();
+
+        final LocalTime horaFinJornada = (fechaInicio.getDayOfWeek() == DayOfWeek.SATURDAY)
+                ? LocalTime.of(13, 0)
+                : LocalTime.of(20, 0);
+        LocalTime horaBase = LocalTime.now();
+
+        while (!horaBase.isAfter(horaFinJornada)) {
+
+            LocalTime horaFin = horaBase.plusMinutes(duracionTotal);
+            if (horaFin.isAfter(horaFinJornada)) {
+                break;
+            }
+
+            boolean disponible = catalogoServiceClient.validarDuracionContinua(idBarbero, fechaInicio, horaBase, horaFin);
+            if (disponible) {
+                return horaBase;
+            }
+
+            horaBase = horaBase.plusMinutes(10);
+        }
+        throw new ReglaNegocioExcepcion("El barbero " + idBarbero + "no tiene disponibilidad el dia "+fechaInicio);
     }
 
     @Override
@@ -168,42 +196,51 @@ public class TurnoServiceImpl implements ITurnoService {
         return true;
     }
 
-    public TurnoDTORespuesta mapearARespuesta(Turno t) {
-        TurnoDTORespuesta dto = new TurnoDTORespuesta();
-        dto.setId(t.getId());
-        dto.setReserva(t.getReserva() != null ? t.getReserva().getId() : null);
-        dto.setCliente(t.getCliente().getId());
-        dto.setServicioId(t.getServicioId());
-        dto.setBarberoId(t.getBarberoId());
-        dto.setEstado(t.getEstado().getId());
-        dto.setDescripcion(t.getDescripcion());
-        dto.setFechaInicio(t.getFechaInicio());
-        dto.setHoraFin(t.getHoraFin());
-        dto.setHoraInicio(t.getHoraInicio());
-        return dto;
-    }
-
-    public Turno mapearAPersistencia(TurnoDTOPeticion dto) {
-        Turno t = new Turno();
-
-        if (dto.getReserva() != null) {
-            t.setReserva(repoReserva.getReferenceById(dto.getReserva()));
+    @Override
+    @Transactional(readOnly = true)
+    public boolean verificarDisponibilidadBarbero(String barberoId, LocalDate fecha, LocalTime horaInicio, LocalTime horaFin) {
+        if (!horaFin.isAfter(horaInicio)) {
+            throw new IllegalArgumentException("Hora fin debe ser posterior a hora inicio");
         }
 
-        t.setCliente(repoCliente.getReferenceById(dto.getCliente()));
-        t.setServicioId(dto.getServicioId());
-        t.setBarberoId(dto.getBarberoId());
-        t.setDescripcion(dto.getDescripcion());
-        t.setFechaInicio(dto.getFechaInicio());
-        t.setHoraFin(null);
-        t.setHoraInicio(dto.getHoraInicio());
-        return t;
+        List<Turno> turnosOcupados = turnoRepository.findTurnosActivosByBarberoAndFecha(barberoId, fecha);
+
+        if (turnosOcupados.isEmpty()) {
+            return true;
+        }
+
+        boolean haySolapamiento = turnosOcupados.stream()
+                .anyMatch(turno -> seSolapan(
+                        horaInicio, horaFin,
+                        turno.getHoraInicio(), turno.getHoraFin()
+                ));
+
+        return !haySolapamiento;
+    }
+
+    private boolean seSolapan(LocalTime inicio1, LocalTime fin1, LocalTime inicio2, LocalTime fin2) {
+        if (inicio1 == null || fin1 == null || inicio2 == null || fin2 == null) {
+            return false;
+        }
+        return inicio1.isBefore(fin2) && inicio2.isBefore(fin1);
     }
 
     public void validarTurno(TurnoDTOPeticion turnoDTO) {
         // Validar barbero
         if (!catalogoServiceClient.validarBarbero(turnoDTO.getBarberoId())) {
             throw new EntidadNoExisteException("Barbero no encontrado con ID: " + turnoDTO.getBarberoId());
+        }
+
+        //validar que el barbero trabaje ese dia
+        LocalDateTime fecha = null;
+        if (turnoDTO.getHoraInicio() != null) {
+            LocalTime hora = LocalTime.of(8, 0);
+            fecha = turnoDTO.getFechaInicio().atTime(hora);
+        }else{
+            fecha = LocalDateTime.now();
+        }
+        if (!catalogoServiceClient.validarTrabajoDiaBarbero(turnoDTO.getBarberoId(), fecha)) {
+            throw new EntidadNoExisteException("El barbero: " + turnoDTO.getBarberoId() + " no trabaja el dia " + turnoDTO.getFechaInicio());
         }
 
         // Validar servicio
@@ -228,5 +265,43 @@ public class TurnoServiceImpl implements ITurnoService {
                 throw new ReglaNegocioExcepcion("No se puede crear un turno para horas pasadas");
             }
         }
+    }
+
+    public LocalTime calcularHoraFin(LocalTime horaInicio, Integer servicioId) {
+        ServicioDTORespuesta servicio = catalogoServiceClient.buscarServicio(servicioId);
+        int duracionTotal = 10 + servicio.getDuracion() + servicio.getPreparacion();
+        return horaInicio.plusMinutes(duracionTotal);
+    }
+
+    public TurnoDTORespuesta mapearARespuesta(Turno t) {
+        TurnoDTORespuesta dto = new TurnoDTORespuesta();
+        dto.setId(t.getId());
+        dto.setReserva(t.getReserva() != null ? t.getReserva().getId() : null);
+        dto.setCliente(t.getCliente().getId());
+        dto.setServicioId(t.getServicioId());
+        dto.setBarberoId(t.getBarberoId());
+        dto.setEstado(t.getEstado().getId());
+        dto.setDescripcion(t.getDescripcion());
+        dto.setFechaInicio(t.getFechaInicio());
+        dto.setHoraInicio(t.getHoraInicio());
+        dto.setHoraFin(t.getHoraFin());
+        return dto;
+    }
+
+    public Turno mapearAPersistencia(TurnoDTOPeticion dto) {
+        Turno t = new Turno();
+
+        if (dto.getReserva() != null) {
+            t.setReserva(repoReserva.getReferenceById(dto.getReserva()));
+        }
+
+        t.setCliente(repoCliente.getReferenceById(dto.getCliente()));
+        t.setServicioId(dto.getServicioId());
+        t.setBarberoId(dto.getBarberoId());
+        t.setDescripcion(dto.getDescripcion());
+        t.setFechaInicio(dto.getFechaInicio());
+        t.setHoraInicio(dto.getHoraInicio());
+        t.setHoraFin(dto.getHoraFin());
+        return t;
     }
 }

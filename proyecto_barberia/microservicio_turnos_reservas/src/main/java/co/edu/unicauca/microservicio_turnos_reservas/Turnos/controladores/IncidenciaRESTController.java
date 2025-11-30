@@ -33,6 +33,5 @@ public class IncidenciaRESTController {
     public ResponseEntity<IncidenciaDTORespuesta> buscar(@PathVariable Integer id) {
         return ResponseEntity.ok(service.findById(id));
     }
-
 }
 
