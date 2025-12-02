@@ -2,6 +2,8 @@ package co.edu.unicauca.microservicio_turnos_reservas.Turnos.fachada.servicios;
 
 import co.edu.unicauca.microservicio_turnos_reservas.Turnos.fachada.DTOs.TurnoDTOPeticion;
 import co.edu.unicauca.microservicio_turnos_reservas.Turnos.fachada.DTOs.TurnoDTORespuesta;
+import co.edu.unicauca.microservicio_turnos_reservas.Turnos.modelos.Estado;
+import co.edu.unicauca.microservicio_turnos_reservas.Turnos.modelos.Turno;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -26,13 +28,18 @@ public interface ITurnoService {
 
     TurnoDTORespuesta update(Integer id, TurnoDTORespuesta servicio);
 
-    TurnoDTORespuesta updateEstado(Integer idTurno, Integer idEstado);
+    TurnoDTORespuesta iniciarTurno(Integer id);
 
-    void turnoClienteNoPresentado(Integer idTurno);
+    TurnoDTORespuesta completarTurno(Integer id);
+
+    TurnoDTORespuesta cancelarTurno(Integer id);
+
+    TurnoDTORespuesta marcarNoPresentado(Integer id);
 
     LocalTime encontrarHora(String idBarbero, Integer idServico, LocalDate fechaInicio);
 
     boolean delete(Integer id);
 
     boolean verificarDisponibilidadBarbero(String barberoId, LocalDate fecha, LocalTime horaInicio, LocalTime horaFin);
+
 }

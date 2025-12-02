@@ -3,7 +3,7 @@ package co.edu.unicauca.microservicio_catalogo_horario.Servicios.fachada.service
 import co.edu.unicauca.microservicio_catalogo_horario.Barberos.accesoADatos.BarberoRepository;
 import co.edu.unicauca.microservicio_catalogo_horario.Barberos.modelos.Barbero;
 import co.edu.unicauca.microservicio_catalogo_horario.Comunicacion.PublicacionEventos.EventPublisher;
-import co.edu.unicauca.microservicio_catalogo_horario.Comunicacion.PublicacionEventos.NotificacionDTO;
+import co.edu.unicauca.microservicio_catalogo_horario.Comunicacion.PublicacionEventos.NotificacionEvento;
 import co.edu.unicauca.microservicio_catalogo_horario.Comunicacion.REST.TurnoDTORespuesta;
 import co.edu.unicauca.microservicio_catalogo_horario.Comunicacion.REST.TurnoServiceClient;
 import co.edu.unicauca.microservicio_catalogo_horario.Excepciones.excepcionesPropias.EntidadNoExisteException;
@@ -134,8 +134,9 @@ public class ServicioServiceImpl implements IServicioService {
             barberoEventPublisher.servicioEnviarSolicitudEliminarTurnos(id);
 
             for (TurnoDTORespuesta t : tieneTurnosFuturos) {
-                NotificacionDTO notificacion = new NotificacionDTO(turnoServiceClient.obtenerCorreo(t.getBarberoId()),"Estimado usuario, le informamos que uno de los servicios asignados a su reserva no se encuentra disponible. Hemos eliminado el servicio de su reserva");
-                barberoEventPublisher.enviarNotificacionClientes(notificacion);
+                Barbero barbero = barberoRepo.getReferenceById(t.getBarberoId());
+                NotificacionEvento notificacion = new NotificacionEvento(turnoServiceClient.obtenerCorreo(t.getCliente()),barbero.getNombre(),s.getNombre(),t.getFechaInicio().toString());
+                barberoEventPublisher.enviarNotificacionCancelacionServicio(notificacion);
             }
         }
 

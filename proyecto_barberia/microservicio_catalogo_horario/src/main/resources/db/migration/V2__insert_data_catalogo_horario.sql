@@ -17,18 +17,18 @@ VALUES
 
 INSERT INTO barbero (barbero_id, administrador_id, ocupacion_id, barbero_nombre, barbero_email, barbero_telefono, barbero_estado, barbero_nacimiento, barbero_fotografia)
 VALUES
-    ('2','1',1,'Carlos Sánchez','carlos@example.com',3001234567,'ACTIVO','1990-05-10',NULL),
-    ('3','1',1,'Ana López','ana@example.com',3009876543,'ACTIVO','1992-08-20',NULL),
-    ('4','1',1,'Luis Herrera','luis.herrera@example.com',3001112222,'ACTIVO','1989-04-15',NULL),
-    ('5','1',1,'Marcos Díaz','marcos.diaz@example.com',3002223333,'ACTIVO','1991-11-07',NULL),
-    ('6','1',1,'Felipe Rojas','felipe.rojas@example.com',3003334444,'ACTIVO','1995-02-19',NULL),
-    ('7','1',1,'David Molina','david.molina@example.com',3004445555,'ACTIVO','1993-07-12',NULL),
-    ('8','1',1,'Esteban Silva','esteban.silva@example.com',3005556666,'ACTIVO','1988-09-03',NULL),
-    ('9','1',1,'Kevin Torres','kevin.torres@example.com',3006667777,'ACTIVO','1996-01-25',NULL),
-    ('10','1',1,'Oscar Mejía','oscar.mejia@example.com',3007778888,'ACTIVO','1994-03-17',NULL),
-    ('11','1',1,'Ricardo Pardo','ricardo.pardo@example.com',3008889999,'ACTIVO','1990-12-30',NULL),
-    ('12','1',1,'Francisco Murillo','francisco.murillo@example.com',3009990000,'ACTIVO','1987-06-29',NULL),
-    ('13','1',1,'Tomás Herrera','tomas.herrera@example.com',3011112222,'ACTIVO','1997-05-22',NULL);
+    ('2','1',1,'Carlos Sánchez','jumaco59@gmail.com',3001234567,'ACTIVO','1990-05-10',NULL),
+    ('3','1',1,'Ana López','jumaco59@gmail.com',3009876543,'ACTIVO','1992-08-20',NULL),
+    ('4','1',1,'Luis Herrera','jumaco59@gmail.com',3001112222,'ACTIVO','1989-04-15',NULL),
+    ('5','1',1,'Marcos Díaz','jumaco59@gmail.com',3002223333,'ACTIVO','1991-11-07',NULL),
+    ('6','1',1,'Felipe Rojas','jumaco59@gmail.com',3003334444,'ACTIVO','1995-02-19',NULL),
+    ('7','1',1,'David Molina','jumaco59@gmail.com',3004445555,'ACTIVO','1993-07-12',NULL),
+    ('8','1',1,'Esteban Silva','jumaco59@gmail.com',3005556666,'ACTIVO','1988-09-03',NULL),
+    ('9','1',1,'Kevin Torres','jumaco59@gmail.com',3006667777,'ACTIVO','1996-01-25',NULL),
+    ('10','1',1,'Oscar Mejía','jumaco59@gmail.com',3007778888,'ACTIVO','1994-03-17',NULL),
+    ('11','1',1,'Ricardo Pardo','jumaco59@gmail.com',3008889999,'ACTIVO','1990-12-30',NULL),
+    ('12','1',1,'Francisco Murillo','jumaco59@gmail.com',3009990000,'ACTIVO','1987-06-29',NULL),
+    ('13','1',1,'Tomás Herrera','jumaco59@gmail.com',3011112222,'ACTIVO','1997-05-22',NULL);
 
 INSERT INTO servicio (categoria_id, administrador_id, servicio_descripcion, servicio_duracion, servicio_precio, servicio_preparacion, servicio_nombre)
 VALUES

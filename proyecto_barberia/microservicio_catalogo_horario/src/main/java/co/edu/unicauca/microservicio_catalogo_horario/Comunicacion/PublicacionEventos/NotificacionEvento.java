@@ -3,11 +3,15 @@ package co.edu.unicauca.microservicio_catalogo_horario.Comunicacion.PublicacionE
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
 @AllArgsConstructor
-public class NotificacionDTO {
-    private String correo;
-    private String mensaje;
+@ToString
+public class NotificacionEvento {
+    private String correoCliente;
+    private String nombreBarbero;
+    private String nombreServicio;
+    private String fecha;
 }

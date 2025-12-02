@@ -45,8 +45,14 @@ public class JwtRelayGatewayFilterFactory extends AbstractGatewayFilterFactory<J
             }
 
             String token = extractToken(exchange.getRequest()); // Extrae el JWT del header.
-            if (token == null || !jwtValidator.validate(token)) { // Valida el token.
-                return unauthorized(exchange, "JWT inválido o faltante");
+            if (token == null) {
+                return unauthorized(exchange, "JWT faltante en la cabecera Authorization");
+            }
+
+            try {
+                jwtValidator.validate(token);
+            } catch (Exception e) {
+                return unauthorized(exchange, e.getMessage());
             }
 
             String username = jwtValidator.getUsernameFromToken(token); // Obtiene el username del token.

@@ -24,13 +24,24 @@ public class JwtValidator {
     }
 
     // Valida que el token JWT sea correcto y esté firmado con la clave esperada
-    public boolean validate(String authToken) {
+    public void validate(String authToken) {
         try {
-            System.out.println("Validando token JWT: " + authToken);
-            Jwts.parserBuilder().setSigningKey(key()).build().parse(authToken);
-            return true;
-        } catch (MalformedJwtException e) {
-            return false;
+            Jwts.parserBuilder()
+                    .setSigningKey(key())
+                    .setAllowedClockSkewSeconds(60) // evita errores por desfase entre microservicios
+                    .build()
+                    .parseClaimsJws(authToken);
+
+        } catch (io.jsonwebtoken.ExpiredJwtException e) {
+            throw new RuntimeException("El token ha expirado.");
+        } catch (io.jsonwebtoken.UnsupportedJwtException e) {
+            throw new RuntimeException("El token tiene un formato no soportado.");
+        } catch (io.jsonwebtoken.MalformedJwtException e) {
+            throw new RuntimeException("El token está mal formado.");
+        } catch (SignatureException e) {
+            throw new RuntimeException("La firma del token no es válida.");
+        } catch (Exception e) {
+            throw new RuntimeException("Token inválido: " + e.getMessage());
         }
     }
 

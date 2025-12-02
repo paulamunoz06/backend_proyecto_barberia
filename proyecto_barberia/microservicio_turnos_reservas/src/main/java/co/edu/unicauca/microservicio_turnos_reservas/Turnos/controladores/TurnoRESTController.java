@@ -34,14 +34,14 @@ public class TurnoRESTController {
         return ResponseEntity.ok(service.findByReservaId(id));
     }
 
+    @GetMapping("/activas/barbero/{barberoId}/{fecha}")
+    public ResponseEntity<List<TurnoDTORespuesta>> listarTurnosActivosPorBarberoFecha(@PathVariable String barberoId, @PathVariable LocalDate fecha) {
+        return ResponseEntity.ok(service.findByBarberoAndFecha(barberoId,fecha));
+    }
+
     @GetMapping("/activas/barbero/{id}")
     public ResponseEntity<List<TurnoDTORespuesta>> listarTurnosActivosPorBarbero(@PathVariable String id) {
         return ResponseEntity.ok(service.findByBarberoIdActivos(id));
-    }
-
-    @GetMapping("/api/turno/activas/barbero/{barberoId}/{fecha}")
-    public ResponseEntity<List<TurnoDTORespuesta>> listarTurnosActivosPorBarberoFecha(@PathVariable String barberoId, @PathVariable LocalDate fecha) {
-        return ResponseEntity.ok(service.findByBarberoAndFecha(barberoId,fecha));
     }
 
     @GetMapping("/activas/servicio/{id}")
@@ -64,9 +64,24 @@ public class TurnoRESTController {
         return ResponseEntity.ok(service.update(id, servicio));
     }
 
-    @PutMapping("/{idTurno}/estado/{idEstado}")
-    public ResponseEntity<TurnoDTORespuesta> actualizarEstado(@PathVariable Integer idTurno, @PathVariable Integer idEstado) {
-        return ResponseEntity.ok(service.updateEstado(idTurno, idEstado));
+    @PutMapping("/iniciar/{id}")
+    public ResponseEntity<TurnoDTORespuesta> iniciarTurno(@PathVariable Integer id) {
+        return ResponseEntity.ok(service.iniciarTurno(id));
+    }
+
+    @PutMapping("/completar/{id}")
+    public ResponseEntity<TurnoDTORespuesta> completarTurno(@PathVariable Integer id) {
+        return ResponseEntity.ok(service.completarTurno(id));
+    }
+
+    @PutMapping("/cancelar/{id}")
+    public ResponseEntity<TurnoDTORespuesta> cancelarTurno(@PathVariable Integer id) {
+        return ResponseEntity.ok(service.cancelarTurno(id));
+    }
+
+    @PutMapping("/noPresentado/{id}")
+    public ResponseEntity<TurnoDTORespuesta> clienteNoPresentado(@PathVariable Integer id) {
+        return ResponseEntity.ok(service.marcarNoPresentado(id));
     }
 
     @DeleteMapping("/{id}")

@@ -8,7 +8,7 @@ import co.edu.unicauca.microservicio_catalogo_horario.Barberos.modelos.Barbero;
 import co.edu.unicauca.microservicio_catalogo_horario.Barberos.modelos.EstadoUsuario;
 import co.edu.unicauca.microservicio_catalogo_horario.Barberos.modelos.Ocupacion;
 import co.edu.unicauca.microservicio_catalogo_horario.Comunicacion.PublicacionEventos.EventPublisher;
-import co.edu.unicauca.microservicio_catalogo_horario.Comunicacion.PublicacionEventos.NotificacionDTO;
+import co.edu.unicauca.microservicio_catalogo_horario.Comunicacion.PublicacionEventos.NotificacionEvento;
 import co.edu.unicauca.microservicio_catalogo_horario.Comunicacion.REST.TurnoDTORespuesta;
 import co.edu.unicauca.microservicio_catalogo_horario.Comunicacion.REST.TurnoServiceClient;
 import co.edu.unicauca.microservicio_catalogo_horario.Excepciones.excepcionesPropias.EntidadNoExisteException;
@@ -108,7 +108,7 @@ public class BarberoServiceImpl implements IBarberoService {
     }
 
     @Override
-    public boolean barberoHaceServicio(String barberoId, Integer servicioId) {
+    public Boolean barberoHaceServicio(String barberoId, Integer servicioId) {
         Barbero b = findByIdInt(barberoId);
 
         return b.getServiciosEspecializados()
@@ -190,8 +190,9 @@ public class BarberoServiceImpl implements IBarberoService {
             barberoEventPublisher.barberoEnviarSolicitudEliminarTurnos(id);
 
             for (TurnoDTORespuesta t : tieneTurnosFuturos) {
-                NotificacionDTO notificacion = new NotificacionDTO(turnoServiceClient.obtenerCorreo(t.getBarberoId()),"Estimado usuario, le informamos que uno de los barberos asignados a su reserva no se encuentra disponible para la fecha programada. Le recomendamos reagendar el servicio para garantizar una adecuada atención.");
-                barberoEventPublisher.enviarNotificacionClientes(notificacion);
+                Servicio servicio = repoServicio.getReferenceById(t.getServicioId());
+                NotificacionEvento notificacion = new NotificacionEvento(turnoServiceClient.obtenerCorreo(t.getCliente()),barbero.getNombre(),servicio.getNombre(),t.getFechaInicio().toString());
+                barberoEventPublisher.enviarNotificacionCancelacionBarbero(notificacion);
             }
         }
 

@@ -12,10 +12,5 @@ public class EventPublisher {
         this.rabbitTemplate = rabbitTemplate;
     }
 
-    public void enviarNotificacionCliente(NotificacionDTO mensaje) {
-        rabbitTemplate.convertAndSend(
-                RabbitMQConfig.NOTIFICAR_CLIENTES_QUEUE,
-                mensaje
-        );
-    }
+
 }

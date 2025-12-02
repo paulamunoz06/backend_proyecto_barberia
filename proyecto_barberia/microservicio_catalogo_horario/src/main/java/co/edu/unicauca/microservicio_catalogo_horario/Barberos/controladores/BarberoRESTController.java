@@ -30,6 +30,11 @@ public class BarberoRESTController {
         return ResponseEntity.ok(service.findService(id));
     }
 
+    @GetMapping("{idBarbero}/verificar/{idServicio}")
+    public ResponseEntity<Boolean> verificarBarberoServicio(@PathVariable String idBarbero, @PathVariable Integer idServicio) {
+        return ResponseEntity.ok(service.barberoHaceServicio(idBarbero,idServicio));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<BarberoDTORespuesta> buscar(@PathVariable String id) {
         return ResponseEntity.ok(service.findById(id));

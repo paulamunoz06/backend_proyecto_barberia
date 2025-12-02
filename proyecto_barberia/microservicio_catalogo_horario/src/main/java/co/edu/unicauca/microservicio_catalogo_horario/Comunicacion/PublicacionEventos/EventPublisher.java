@@ -26,10 +26,25 @@ public class EventPublisher {
         );
     }
 
-    public void enviarNotificacionClientes(NotificacionDTO mensaje) {
+    public void enviarNotificacionCancelacionBarbero(NotificacionEvento notificacion) {
         rabbitTemplate.convertAndSend(
-                RabbitMQConfig.NOTIFICAR_CLIENTES_QUEUE,
-                mensaje
+                RabbitMQConfig.NOTIFICAR_CANCELACION_BARBERO_QUEUE,
+                convertirNotificacionString(notificacion)
         );
+    }
+
+    public void enviarNotificacionCancelacionServicio(NotificacionEvento notificacion) {
+        rabbitTemplate.convertAndSend(
+                RabbitMQConfig.NOTIFICAR_CANCELACION_SERVICIO_QUEUE,
+                convertirNotificacionString(notificacion)
+        );
+    }
+
+    private String convertirNotificacionString(NotificacionEvento notificacion) {
+        return String.format("%s,%s,%s,%s",
+                notificacion.getCorreoCliente(),
+                notificacion.getNombreBarbero(),
+                notificacion.getNombreServicio(),
+                notificacion.getFecha());
     }
 }

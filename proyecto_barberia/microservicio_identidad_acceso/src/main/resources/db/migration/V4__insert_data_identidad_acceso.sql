@@ -45,6 +45,7 @@ INSERT INTO microservicio_permissions (microservice_name, endpoint_pattern, http
 ('catalogo-service', '/api/barbero', 'POST', 'ADMINISTRADOR', ''),
 ('catalogo-service', '/api/barbero/*', 'PUT', 'ADMINISTRADOR', ''),
 ('catalogo-service', '/api/barbero/*', 'DELETE', 'ADMINISTRADOR', ''),
+('catalogo-service', '/api/barbero/*/verificar/*', 'GET', 'ADMINISTRADOR', ''),
 ('catalogo-service', '/api/franja/horario/*', 'GET', 'BARBERO,ADMINISTRADOR', 'Buscar horario por fecha'),
 ('catalogo-service', '/api/franja/barbero/*', 'GET', 'BARBERO,ADMINISTRADOR', 'Buscar franjas por barbero'),
 ('catalogo-service', '/api/franja/barbero/*/*', 'GET', 'BARBERO,ADMINISTRADOR', 'Buscar franjas por barbero desde una hora'),
@@ -97,6 +98,9 @@ INSERT INTO microservicio_permissions (microservice_name, endpoint_pattern, http
 ('reserva-service', '/api/turno/*', 'GET', 'CLIENTE,BARBERO,ADMINISTRADOR', 'Buscar turno por ID'),
 ('reserva-service', '/api/turno', 'POST', 'CLIENTE,BARBERO,ADMINISTRADOR', 'Crear un nuevo turno'),
 ('reserva-service', '/api/turno/*', 'PUT', 'CLIENTE,BARBERO,ADMINISTRADOR', 'Actualizar un turno existente'),
-('reserva-service', '/api/turno/*/estado/*', 'PUT', 'CLIENTE,BARBERO,ADMINISTRADOR', 'Actualizar el estado de un turno existente'),
+('reserva-service', '/api/turno/iniciar/*', 'PUT', 'CLIENTE,BARBERO,ADMINISTRADOR', 'Inciar un turno'),
+('reserva-service', '/api/turno/completar/*', 'PUT', 'CLIENTE,BARBERO,ADMINISTRADOR', 'Completar un turno'),
+('reserva-service', '/api/turno/cancelar/*', 'PUT', 'CLIENTE,BARBERO,ADMINISTRADOR', 'Cancelar un turno'),
+('reserva-service', '/api/turno/noPresentado/*', 'PUT', 'CLIENTE,BARBERO,ADMINISTRADOR', 'Cliente no presentado'),
 ('reserva-service', '/api/turno/*', 'DELETE', 'CLIENTE,BARBERO,ADMINISTRADOR', 'Eliminar un turno por ID'),
 ('reserva-service', '/api/turno/barbero/*/disponibilidad', 'GET', 'BARBERO,ADMINISTRADOR', 'Verificar la disponibilidad de un barbero respecto a sus turnos');

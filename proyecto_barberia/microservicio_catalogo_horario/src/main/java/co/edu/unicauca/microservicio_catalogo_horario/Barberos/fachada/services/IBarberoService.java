@@ -3,6 +3,9 @@ package co.edu.unicauca.microservicio_catalogo_horario.Barberos.fachada.services
 import co.edu.unicauca.microservicio_catalogo_horario.Barberos.fachada.DTOs.BarberoDTOPeticion;
 import co.edu.unicauca.microservicio_catalogo_horario.Barberos.fachada.DTOs.BarberoDTORespuesta;
 import co.edu.unicauca.microservicio_catalogo_horario.Barberos.modelos.Barbero;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 
@@ -17,7 +20,7 @@ public interface IBarberoService {
 
     Barbero findByIdInt(String id);
 
-    boolean barberoHaceServicio(String barberoId, Integer servicioId);
+    Boolean barberoHaceServicio(String barberoId, Integer servicioId);
 
     BarberoDTORespuesta save(BarberoDTOPeticion barbero);
 
@@ -26,6 +29,5 @@ public interface IBarberoService {
     BarberoDTORespuesta updateOcupacion(String id, String ocupacionId);
 
     boolean delete(String id);
-
 
 }

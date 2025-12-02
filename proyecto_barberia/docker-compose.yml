@@ -130,6 +130,8 @@ services:
     depends_on:
       - turnos-reservas-db
       - rabbitmq
+    env_file:
+      - .env.sendgrid
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://turnos-reservas-db:5432/turnos-reservas-database
       SPRING_DATASOURCE_USERNAME: app_user

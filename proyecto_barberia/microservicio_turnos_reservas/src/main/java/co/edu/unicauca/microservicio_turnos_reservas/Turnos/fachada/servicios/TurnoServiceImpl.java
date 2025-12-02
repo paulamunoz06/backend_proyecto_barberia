@@ -3,9 +3,9 @@ package co.edu.unicauca.microservicio_turnos_reservas.Turnos.fachada.servicios;
 import co.edu.unicauca.microservicio_turnos_reservas.Cliente.accesoADatos.ClienteRepository;
 import co.edu.unicauca.microservicio_turnos_reservas.Cliente.fachada.DTOs.ServicioDTORespuesta;
 import co.edu.unicauca.microservicio_turnos_reservas.Comunicacion.PublicacionEventos.EventPublisher;
-import co.edu.unicauca.microservicio_turnos_reservas.Comunicacion.PublicacionEventos.NotificacionDTO;
 import co.edu.unicauca.microservicio_turnos_reservas.Comunicacion.REST.CatalogoServiceClient;
 import co.edu.unicauca.microservicio_turnos_reservas.Cliente.modelos.Cliente;
+import co.edu.unicauca.microservicio_turnos_reservas.Email.NotificacionesCliente;
 import co.edu.unicauca.microservicio_turnos_reservas.Excepciones.excepcionesPropias.EntidadNoExisteException;
 import co.edu.unicauca.microservicio_turnos_reservas.Excepciones.excepcionesPropias.ReglaNegocioExcepcion;
 import co.edu.unicauca.microservicio_turnos_reservas.Reservas.modelos.Reserva;
@@ -45,7 +45,7 @@ public class TurnoServiceImpl implements ITurnoService {
     private CatalogoServiceClient catalogoServiceClient;
 
     @Autowired
-    private EventPublisher publicadorEventos;
+    private NotificacionesCliente notificacionService;
 
     @Override
     public List<TurnoDTORespuesta> findAll() {
@@ -135,12 +135,10 @@ public class TurnoServiceImpl implements ITurnoService {
         turno.setEstado(estado);
         if (turnoDTO.getHoraInicio() == null) {
             turno.setHoraInicio(encontrarHora(turnoDTO.getBarberoId(),turnoDTO.getServicioId(),turnoDTO.getFechaInicio()));
-            turno.setHoraFin(calcularHoraFin(turnoDTO.getHoraInicio(),turnoDTO.getServicioId()));
-
         }else {
             turno.setHoraInicio(turnoDTO.getHoraInicio());
-            turno.setHoraFin(turnoDTO.getHoraFin());
         }
+        turno.setHoraFin(calcularHoraFin(turno.getHoraInicio(),turnoDTO.getServicioId()));
 
         Turno turnoGuardado = turnoRepository.save(turno);
         return mapearARespuesta(turnoGuardado);
@@ -168,40 +166,51 @@ public class TurnoServiceImpl implements ITurnoService {
         turnoExistente.setEstado(estado);
         turnoExistente.setDescripcion(turnoDTO.getDescripcion());
         turnoExistente.setFechaInicio(turnoDTO.getFechaInicio());
-        if (turnoDTOValidacion.getHoraInicio() == null) {
-            turnoExistente.setHoraInicio(encontrarHora(turnoDTO.getBarberoId(), turnoDTO.getServicioId(),turnoDTO.getFechaInicio()));
-            turnoExistente.setHoraFin(calcularHoraFin(turnoExistente.getHoraInicio(), turnoDTO.getServicioId()));
+        if (turnoDTO.getHoraInicio() == null) {
+            turnoExistente.setHoraInicio(encontrarHora(turnoDTO.getBarberoId(),turnoDTO.getServicioId(),turnoDTO.getFechaInicio()));
         }else {
-            turnoExistente.setHoraInicio(turnoDTOValidacion.getHoraInicio());
-            turnoExistente.setHoraFin(turnoDTOValidacion.getHoraFin());
+            turnoExistente.setHoraInicio(turnoDTO.getHoraInicio());
         }
+        turnoExistente.setHoraFin(calcularHoraFin(turnoExistente.getHoraInicio(),turnoDTO.getServicioId()));
 
         Turno turnoActualizado = turnoRepository.save(turnoExistente);
         return mapearARespuesta(turnoActualizado);
     }
 
     @Override
-    public TurnoDTORespuesta updateEstado(Integer idTurno, Integer idEstado) {
-        Turno turnoExistente = turnoRepository.findById(idTurno).orElseThrow(() -> new EntidadNoExisteException("Turno no encontrado con ID: " + idTurno));
-        Estado estado = repoEstado.findById(idEstado).orElseThrow(() -> new EntidadNoExisteException("Estado no encontrado con ID: " + idEstado));
-        turnoExistente.setEstado(estado);
-        Turno turnoActualizado = turnoRepository.save(turnoExistente);
-        return mapearARespuesta(turnoActualizado);
+    public TurnoDTORespuesta iniciarTurno(Integer id) {
+        Turno turno = turnoRepository.findById(id).orElseThrow(() -> new EntidadNoExisteException("Turno no encontrado con ID: " + id));
+        Cliente cliente = repoCliente.getReferenceById(turno.getCliente().getId());
+        turno.iniciar();
+        return mapearCambioEstado(turno, cliente);
     }
 
     @Override
-    public void turnoClienteNoPresentado(Integer idTurno) {
-        Turno turnoExistente = turnoRepository.findById(idTurno).orElseThrow(() -> new EntidadNoExisteException("Turno no encontrado con ID: " + idTurno));
-        Cliente cliente = repoCliente.getReferenceById(turnoExistente.getCliente().getId());
+    public TurnoDTORespuesta completarTurno(Integer id) {
+        Turno turno = turnoRepository.findById(id).orElseThrow(() -> new EntidadNoExisteException("Turno no encontrado con ID: " + id));
+        Cliente cliente = repoCliente.getReferenceById(turno.getCliente().getId());
+        turno.completar();
+        return mapearCambioEstado(turno, cliente);
+    }
 
-        Estado estado = repoEstado.findById(4).orElseThrow(() -> new EntidadNoExisteException("Estado no encontrado con ID" ));
-        turnoExistente.setEstado(estado);
-        turnoExistente.setHoraFin(LocalTime.now());
+    @Override
+    public TurnoDTORespuesta cancelarTurno(Integer id) {
+        Turno turno = turnoRepository.findById(id).orElseThrow(() -> new EntidadNoExisteException("Turno no encontrado con ID: " + id));
+        Cliente cliente = repoCliente.getReferenceById(turno.getCliente().getId());
+        turno.cancelar();
+        return mapearCambioEstado(turno, cliente);
+    }
 
-        NotificacionDTO notificacion = new NotificacionDTO(cliente.getEmail(), "Querido cliente, su cita ha sido cancelada debido a que no se presentó en el horario asignado. Fecha y hora del turno: " + turnoExistente.getFechaInicio() + " - " + turnoExistente.getHoraFin() );
-        publicadorEventos.enviarNotificacionCliente(notificacion);
-
-        turnoRepository.save(turnoExistente);
+    @Override
+    public TurnoDTORespuesta marcarNoPresentado(Integer id) {
+        Turno turno = turnoRepository.findById(id).orElseThrow(() -> new EntidadNoExisteException("Turno no encontrado con ID: " + id));
+        Cliente cliente = repoCliente.getReferenceById(turno.getCliente().getId());
+        turno.marcarNoPresentado();
+        Estado estado = repoEstado.findByNombre(turno.getState().getNombre()).orElseThrow(() -> new EntidadNoExisteException("Estado no encontrado con ID" ));
+        turno.setEstado(estado);
+        notificacionService.notificarCancelacionDemora(cliente.getEmail(),turno.getFechaInicio().toString(),turno.getHoraInicio().toString());
+        Turno turnoNuevo = turnoRepository.save(turno);
+        return mapearARespuesta(turnoNuevo);
     }
 
     @Override
@@ -212,7 +221,7 @@ public class TurnoServiceImpl implements ITurnoService {
         final LocalTime horaFinJornada = (fechaInicio.getDayOfWeek() == DayOfWeek.SATURDAY)
                 ? LocalTime.of(13, 0)
                 : LocalTime.of(20, 0);
-        LocalTime horaBase = LocalTime.now();
+        LocalTime horaBase = LocalTime.now().withSecond(0).withNano(0);
 
         while (!horaBase.isAfter(horaFinJornada)) {
 
@@ -271,6 +280,7 @@ public class TurnoServiceImpl implements ITurnoService {
         System.out.println("Se eliminaron " + turnosActivos.size() + " turnos activos del barbero " + barberoId);
     }
 
+
     public void eliminarTurnosActivosPorServicio(Integer servicioId) {
         List<Turno> turnosActivos = turnoRepository.findByServicioIdAndEstadoActivo(servicioId);
         if (turnosActivos.isEmpty()) {
@@ -313,9 +323,22 @@ public class TurnoServiceImpl implements ITurnoService {
             throw new EntidadNoExisteException("Servicio no encontrado con ID: " + turnoDTO.getServicioId());
         }
 
+        //Validar que el barbero haga el servicio
+        if (!catalogoServiceClient.validarBarberoHaceServicio(turnoDTO.getBarberoId(), turnoDTO.getServicioId())) {
+            throw new EntidadNoExisteException("El barbero: " + turnoDTO.getBarberoId() + " no hace el servicio: " + turnoDTO.getServicioId());
+        }
+
         // Validar fechas
-        if(turnoDTO.getFechaInicio() != null){
+        if(turnoDTO.getFechaInicio() != null && turnoDTO.getHoraInicio() != null){
             validarFechasTurno(turnoDTO.getFechaInicio(), turnoDTO.getHoraInicio());
+        }
+
+        //Validar disponibilidad
+        if (turnoDTO.getFechaInicio() != null &&
+                turnoDTO.getHoraInicio() != null &&
+                turnoDTO.getHoraFin() != null &&
+                !verificarDisponibilidadBarbero(turnoDTO.getBarberoId(),turnoDTO.getFechaInicio(),turnoDTO.getHoraInicio(),turnoDTO.getHoraFin())) {
+            throw new EntidadNoExisteException("El barbero: " + turnoDTO.getBarberoId() + " no tiene disponibilidad para la fecha " + turnoDTO.getFechaInicio() + " hora " + turnoDTO.getHoraInicio() + "-" + turnoDTO.getHoraFin());
         }
     }
 
@@ -368,5 +391,13 @@ public class TurnoServiceImpl implements ITurnoService {
         t.setHoraInicio(dto.getHoraInicio());
         t.setHoraFin(dto.getHoraFin());
         return t;
+    }
+
+    private TurnoDTORespuesta mapearCambioEstado(Turno turno, Cliente cliente) {
+        Estado estado = repoEstado.findByNombre(turno.getState().getNombre()).orElseThrow(() -> new EntidadNoExisteException("Estado no encontrado con ID" ));
+        turno.setEstado(estado);
+        notificacionService.notificarCambioEstado(cliente.getEmail(),turno.getState().getNombre(),turno.getFechaInicio().toString(),turno.getHoraInicio().toString());
+        Turno turnoNuevo = turnoRepository.save(turno);
+        return mapearARespuesta(turnoNuevo);
     }
 }

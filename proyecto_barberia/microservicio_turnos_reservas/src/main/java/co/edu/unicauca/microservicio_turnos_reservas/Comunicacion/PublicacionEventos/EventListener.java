@@ -1,13 +1,20 @@
 package co.edu.unicauca.microservicio_turnos_reservas.Comunicacion.PublicacionEventos;
 
+import co.edu.unicauca.microservicio_turnos_reservas.Email.NotificacionesCliente;
 import co.edu.unicauca.microservicio_turnos_reservas.Turnos.fachada.servicios.TurnoServiceImpl;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.time.LocalDateTime;
 
 @Component
 public class EventListener {
 
     private final TurnoServiceImpl turnoService;
+
+    @Autowired
+    private NotificacionesCliente notificacionesCliente;
 
     public EventListener(TurnoServiceImpl turnoService) {
         this.turnoService = turnoService;
@@ -39,13 +46,31 @@ public class EventListener {
         }
     }
 
-    @RabbitListener(queues = "notificarClientesQueue")
-    public void notificarMensajeCliente(NotificacionDTO mensaje) {
-
+    @RabbitListener(queues = "notificarCancelacionBarberoQueue")
+    public void notificarMensajeCancelacionBarbero(String mensaje) {
+        NotificacionEvento notificacion = convertirStringNotificacion(mensaje);
+        notificacionesCliente.notificarCancelacionBarbero(notificacion.getCorreoCliente(), notificacion.getNombreBarbero(), notificacion.getNombreServicio(), notificacion.getFecha());
     }
 
-    @RabbitListener(queues = "notificarAdministradorIncidenciaQueue")
-    public void notificarMensajeAdministrador(NotificacionDTO mensaje) {
+    @RabbitListener(queues = "notificarCancelacionServicioQueue")
+    public void otificarMensajeCancelacionServicio(String mensaje) {
+        NotificacionEvento notificacion = convertirStringNotificacion(mensaje);
+        notificacionesCliente.notificarCancelacionServicio(notificacion.getCorreoCliente(), notificacion.getNombreBarbero(), notificacion.getNombreServicio(), notificacion.getFecha());
+    }
 
+    private NotificacionEvento convertirStringNotificacion(String mensaje) {
+        String[] partes = mensaje.split(",");
+
+        if (partes.length >= 4) {
+            String correo = partes[0];
+            String nombreBarbero = partes[1];
+            String nombreServicio = partes[2];
+            String fecha = partes[3];
+
+            // Crear entidad o procesar
+            NotificacionEvento notificacion = new NotificacionEvento(correo, nombreBarbero, nombreServicio, fecha);
+            return notificacion;
+        }
+        throw new RuntimeException("Error al convertir notificacion: " + mensaje);
     }
 }

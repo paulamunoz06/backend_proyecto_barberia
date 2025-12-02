@@ -1,11 +1,11 @@
 INSERT INTO cliente (cliente_id, cliente_nombre, cliente_email, cliente_telefono, cliente_estado)
 VALUES
-('14', 'Juan Perez', 'juan@example.com', 3209021633, 'ACTIVO'),
-('15', 'María Gómez', 'maria@example.com', 3104567890, 'ACTIVO'),
-('16', 'Luis Fernández', 'luis@example.com', 3217890123, 'ACTIVO'),
-('17', 'Carolina Rojas', 'carolina@example.com', 3156789012, 'ACTIVO'),
-('18', 'Andrés Castillo', 'andres@example.com', 3223456789, 'ACTIVO'),
-('19', 'Paola Martínez', 'paola@example.com', 3192345678, 'ACTIVO');
+('14', 'Juan Perez', 'jumaco59@gmail.com', 3209021633, 'ACTIVO'),
+('15', 'María Gómez', 'jumaco59@gmail.com', 3104567890, 'ACTIVO'),
+('16', 'Luis Fernández', 'jumaco59@gmail.com', 3217890123, 'ACTIVO'),
+('17', 'Carolina Rojas', 'jumaco59@gmail.com', 3156789012, 'ACTIVO'),
+('18', 'Andrés Castillo', 'jumaco59@gmail.com', 3223456789, 'ACTIVO'),
+('19', 'Paola Martínez', 'jumaco59@gmail.com', 3192345678, 'ACTIVO');
 
 INSERT INTO reserva (cliente_id, reserva_fecha)
 VALUES
@@ -31,7 +31,7 @@ VALUES
 INSERT INTO turno (reserva_id, cliente_id, servicio_id, barbero_id, estado_id, turno_descripcion, turno_hora_inicio, turno_hora_fin, turno_fecha)
 VALUES
 (1, '14', 1, '2', 1, 'Corte básico', '08:00', '08:40','2025-12-02'),
-(1, '14', 2, '3', 2, 'Corte premium', '08:40', '11:00','2025-12-02'),
+(1, '14', 2, '3', 2, 'Corte preqmium', '08:40', '11:00','2025-12-02'),
 (3, '14', 2, '3', 2, 'Corte premium', '10:00', '10:30','2025-12-04'),
 (4, '15', 1, '4', 1, 'Corte Clásico', '08:00', '08:30','2025-12-03'),
 (5, '15', 5, '2', 1, 'Diseño de Barba', '08:30', '09:10','2025-12-05'),

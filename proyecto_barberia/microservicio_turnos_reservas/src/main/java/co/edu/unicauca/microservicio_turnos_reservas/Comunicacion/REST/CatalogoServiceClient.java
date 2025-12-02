@@ -49,20 +49,27 @@ public class CatalogoServiceClient {
 
     public boolean validarTrabajoDiaBarbero(String id, LocalDateTime horaInicioBusqueda) {
         Boolean resultado = webClient.post()
-                .uri("/api/franja/barbero/{id}/{horaInicio}", id, horaInicioBusqueda)
+                .uri("/api/franja/barbero/{id}/{horaInicioBusqueda}", id, horaInicioBusqueda)
                 .retrieve()
                 .bodyToMono(Boolean.class)
-                .onErrorReturn(false)
+                .block();
+        return resultado;
+    }
+
+    public boolean validarBarberoHaceServicio(String idBarbero, Integer idServicio) {
+        Boolean resultado = webClient.get()
+                .uri("/api/barbero/{id}/verificar/{idServicio}", idBarbero, idServicio)
+                .retrieve()
+                .bodyToMono(Boolean.class)
                 .block();
         return resultado;
     }
 
     public boolean validarDuracionContinua(String id, LocalDate fecha, LocalTime inicio, LocalTime fin) {
-        Boolean resultado = webClient.post()
-                .uri("/barbero/{id}/{fecha}/{inicio}/{fin}", id, fecha, inicio,fin)
+        Boolean resultado = webClient.get()
+                .uri("/api/franja/barbero/{id}/{fecha}/{inicio}/{fin}", id, fecha, inicio,fin)
                 .retrieve()
                 .bodyToMono(Boolean.class)
-                .onErrorReturn(false)
                 .block();
         return resultado;
     }

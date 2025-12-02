@@ -2,8 +2,9 @@ package co.edu.unicauca.microservicio_turnos_reservas.Turnos.modelos;
 
 import co.edu.unicauca.microservicio_turnos_reservas.Cliente.modelos.Cliente;
 import co.edu.unicauca.microservicio_turnos_reservas.Reservas.modelos.Reserva;
-import co.edu.unicauca.microservicio_turnos_reservas.Turnos.Observer.ObservadoresTurno;
-import co.edu.unicauca.microservicio_turnos_reservas.Turnos.fachada.DTOs.TurnoDTORespuesta;
+import co.edu.unicauca.microservicio_turnos_reservas.Turnos.State.ConfirmadoState;
+import co.edu.unicauca.microservicio_turnos_reservas.Turnos.State.TurnoState;
+import co.edu.unicauca.microservicio_turnos_reservas.Turnos.State.TurnoStateFactory;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -53,4 +54,23 @@ public class Turno {
 
     @Column(name = "turno_hora_fin", nullable = true)
     private LocalTime HoraFin;
+
+    @Transient
+    private TurnoState state;
+
+    @PostLoad
+    public void inicializarEstado() {
+        this.state = TurnoStateFactory.create(estado.getNombre());
+        this.state.setContext(this);
+    }
+
+    public void cambiarEstado(TurnoState nuevoEstado) {
+        this.state = nuevoEstado;
+        nuevoEstado.setContext(this);
+    }
+
+    public void iniciar() { state.iniciar(); }
+    public void cancelar() { state.cancelar(); }
+    public void completar() { state.completar(); }
+    public void marcarNoPresentado() { state.marcarNoPresentado(); }
 }
