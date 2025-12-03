@@ -15,7 +15,7 @@ public class AsignarRESTController {
     @Autowired
     private AsignarBarberoService service;
 
-    @GetMapping
+    @PostMapping
     public ResponseEntity<List<BarberoFranjaDTORespuesta>> definirHorario(@RequestBody BarberoFranjaDTOPeticion peticion) {
         return ResponseEntity.ok(service.ejecutarEstrategia(peticion));
     }

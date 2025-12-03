@@ -1,5 +1,6 @@
 package co.edu.unicauca.microservicio_turnos_reservas.Turnos.fachada.servicios;
 
+import co.edu.unicauca.microservicio_turnos_reservas.Turnos.fachada.DTOs.TipoIncidenciaDTORespuesta;
 import co.edu.unicauca.microservicio_turnos_reservas.Turnos.fachada.DTOs.TurnoDTOPeticion;
 import co.edu.unicauca.microservicio_turnos_reservas.Turnos.fachada.DTOs.TurnoDTORespuesta;
 import co.edu.unicauca.microservicio_turnos_reservas.Turnos.modelos.Estado;
@@ -36,10 +37,5 @@ public interface ITurnoService {
 
     TurnoDTORespuesta marcarNoPresentado(Integer id);
 
-    LocalTime encontrarHora(String idBarbero, Integer idServico, LocalDate fechaInicio);
-
-    boolean delete(Integer id);
-
     boolean verificarDisponibilidadBarbero(String barberoId, LocalDate fecha, LocalTime horaInicio, LocalTime horaFin);
-
 }

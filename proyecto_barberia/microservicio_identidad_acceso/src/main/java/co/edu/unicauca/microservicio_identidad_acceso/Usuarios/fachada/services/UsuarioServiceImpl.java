@@ -17,6 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -39,7 +41,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
     ClienteClient clienteClient;
 
     @Override
-    public ResponseEntity<?> registerBarbero(BarberoUsuarioDTOPeticion signUpRequest) {
+    public ResponseEntity<?> registerBarbero(BarberoUsuarioDTOPeticion signUpRequest, MultipartFile archivo) {
         if(userRepository.existsByUsername(signUpRequest.getId())) {
             throw new EntidadYaExisteException("El usuario ya se encuentra registrado");
         }

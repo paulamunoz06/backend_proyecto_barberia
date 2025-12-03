@@ -1,5 +1,6 @@
 package co.edu.unicauca.microservicio_turnos_reservas.Turnos.controladores;
 
+import co.edu.unicauca.microservicio_turnos_reservas.Turnos.fachada.DTOs.TipoIncidenciaDTORespuesta;
 import co.edu.unicauca.microservicio_turnos_reservas.Turnos.fachada.DTOs.TurnoDTOPeticion;
 import co.edu.unicauca.microservicio_turnos_reservas.Turnos.fachada.DTOs.TurnoDTORespuesta;
 import co.edu.unicauca.microservicio_turnos_reservas.Turnos.fachada.servicios.ITurnoService;
@@ -82,11 +83,6 @@ public class TurnoRESTController {
     @PutMapping("/noPresentado/{id}")
     public ResponseEntity<TurnoDTORespuesta> clienteNoPresentado(@PathVariable Integer id) {
         return ResponseEntity.ok(service.marcarNoPresentado(id));
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Boolean> eliminar(@PathVariable Integer id) {
-        return ResponseEntity.ok(service.delete(id));
     }
 
     @GetMapping("/barbero/{barberoId}/disponibilidad")

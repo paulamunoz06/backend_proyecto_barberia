@@ -36,7 +36,7 @@ INSERT INTO usuario_roles (usuario_id, rol_id) VALUES
 ('14',3);
 
 INSERT INTO microservicio_permissions (microservice_name, endpoint_pattern, http_method, required_roles, description) VALUES
-('catalogo-service', '/api/asignar*', 'GET', 'CLIENTE', ''),
+('catalogo-service', '/api/asignar*', 'POST', 'CLIENTE,ADMINISTRADOR', ''),
 ('catalogo-service', '/api/barbero', 'GET', 'CLIENTE,ADMINISTRADOR', ''),
 ('catalogo-service', '/api/barbero/activos', 'GET', 'CLIENTE,ADMINISTRADOR', ''),
 ('catalogo-service', '/api/barbero/servicio/*', 'GET', 'CLIENTE,ADMINISTRADOR', ''),
@@ -89,6 +89,8 @@ INSERT INTO microservicio_permissions (microservice_name, endpoint_pattern, http
 ('reserva-service', '/api/incidencia/reserva/*', 'GET', 'CLIENTE,BARBERO,ADMINISTRADOR', 'Listar incidencias por reserva'),
 ('reserva-service', '/api/incidencia/turno/*', 'GET', 'BARBERO,ADMINISTRADOR', 'Listar incidencias por turno'),
 ('reserva-service', '/api/incidencia/*', 'GET', 'CLIENTE,BARBERO,ADMINISTRADOR', 'Buscar incidencia por ID'),
+('reserva-service', '/api/incidencia', 'POST', 'BARBERO,ADMINISTRADOR', 'Crear incidencia'),
+('reserva-service', '/api/incidencia/turnos', 'GET', 'CLIENTE,BARBERO,ADMINISTRADOR', 'Listar tipos de inciencias'),
 ('reserva-service', '/api/turno', 'GET', 'ADMINISTRADOR', 'Listar todos los turnos'),
 ('reserva-service', '/api/turno/barbero/*', 'GET', 'BARBERO,ADMINISTRADOR', 'Listar turnos por barbero'),
 ('reserva-service', '/api/turno/reserva/*', 'GET', 'CLIENTE,BARBERO,ADMINISTRADOR', 'Listar turnos por reserva'),

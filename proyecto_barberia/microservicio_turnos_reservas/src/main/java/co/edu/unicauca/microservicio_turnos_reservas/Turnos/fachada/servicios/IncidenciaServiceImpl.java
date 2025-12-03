@@ -8,6 +8,7 @@ import co.edu.unicauca.microservicio_turnos_reservas.Turnos.accesoADatos.TipoInc
 import co.edu.unicauca.microservicio_turnos_reservas.Turnos.accesoADatos.TurnoRepository;
 import co.edu.unicauca.microservicio_turnos_reservas.Turnos.fachada.DTOs.IncidenciaDTOPeticion;
 import co.edu.unicauca.microservicio_turnos_reservas.Turnos.fachada.DTOs.IncidenciaDTORespuesta;
+import co.edu.unicauca.microservicio_turnos_reservas.Turnos.fachada.DTOs.TipoIncidenciaDTORespuesta;
 import co.edu.unicauca.microservicio_turnos_reservas.Turnos.modelos.Incidencia;
 import co.edu.unicauca.microservicio_turnos_reservas.Turnos.modelos.TipoIncidencia;
 import co.edu.unicauca.microservicio_turnos_reservas.Turnos.modelos.Turno;
@@ -84,12 +85,30 @@ public class IncidenciaServiceImpl implements IIncidenciaService{
         return mapearARespuesta(incidenciaGuardada);
     }
 
+    @Override
+    public List<TipoIncidenciaDTORespuesta> listarTipoIncidencias() {
+        List<TipoIncidencia> tipos = repoTipo.findAll();
+        if (tipos.isEmpty()) {
+            throw new ReglaNegocioExcepcion("No hay tipos de incidencia actualmente.");
+        }
+        return tipos.stream()
+                .map(this::mapearARespuestaTipo)
+                .collect(Collectors.toList());
+    }
+
     public IncidenciaDTORespuesta mapearARespuesta(Incidencia i) {
         IncidenciaDTORespuesta dto = new IncidenciaDTORespuesta();
         dto.setId(i.getId());
         dto.setTurno(i.getTurno().getId());
         dto.setTipoIncidencia(i.getTipoIncidencia().getId());
         dto.setDescripcion(i.getDescripcion());
+        return dto;
+    }
+
+    public TipoIncidenciaDTORespuesta mapearARespuestaTipo(TipoIncidencia t) {
+        TipoIncidenciaDTORespuesta dto = new TipoIncidenciaDTORespuesta();
+        dto.setId(t.getId());
+        dto.setNombre(t.getNombre());
         return dto;
     }
 

@@ -11,10 +11,13 @@ import co.edu.unicauca.microservicio_turnos_reservas.Excepciones.excepcionesProp
 import co.edu.unicauca.microservicio_turnos_reservas.Reservas.modelos.Reserva;
 import co.edu.unicauca.microservicio_turnos_reservas.Turnos.accesoADatos.EstadoRepository;
 import co.edu.unicauca.microservicio_turnos_reservas.Reservas.accesoADatos.ReservaRepository;
+import co.edu.unicauca.microservicio_turnos_reservas.Turnos.accesoADatos.TipoIncidenciaRepository;
 import co.edu.unicauca.microservicio_turnos_reservas.Turnos.accesoADatos.TurnoRepository;
+import co.edu.unicauca.microservicio_turnos_reservas.Turnos.fachada.DTOs.TipoIncidenciaDTORespuesta;
 import co.edu.unicauca.microservicio_turnos_reservas.Turnos.fachada.DTOs.TurnoDTOPeticion;
 import co.edu.unicauca.microservicio_turnos_reservas.Turnos.fachada.DTOs.TurnoDTORespuesta;
 import co.edu.unicauca.microservicio_turnos_reservas.Turnos.modelos.Estado;
+import co.edu.unicauca.microservicio_turnos_reservas.Turnos.modelos.TipoIncidencia;
 import co.edu.unicauca.microservicio_turnos_reservas.Turnos.modelos.Turno;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -157,7 +160,10 @@ public class TurnoServiceImpl implements ITurnoService {
 
         Turno turnoExistente = turnoRepository.findById(id).orElseThrow(() -> new EntidadNoExisteException("Turno no encontrado con ID: " + id));
         Cliente cliente = repoCliente.findById(turnoDTO.getCliente()).orElseThrow(() -> new EntidadNoExisteException("Cliente no encontrado con ID: " + turnoDTO.getCliente()));
-        Estado estado = repoEstado.findById(turnoDTO.getEstado()).orElseThrow(() -> new EntidadNoExisteException("Estado no encontrado con ID: " + turnoDTO.getEstado()));
+        if (turnoDTO.getEstado() != 1) {
+            throw new ReglaNegocioExcepcion("No es posible modificar un turno con estado: " + turnoDTO.getEstado());
+        }
+        Estado estado = repoEstado.findById(turnoDTO.getEstado()).orElseThrow(() -> new EntidadNoExisteException("Estado no encontrado con ID" ));
 
         turnoExistente.setReserva(turnoExistente.getReserva());
         turnoExistente.setCliente(cliente);
@@ -180,6 +186,17 @@ public class TurnoServiceImpl implements ITurnoService {
     @Override
     public TurnoDTORespuesta iniciarTurno(Integer id) {
         Turno turno = turnoRepository.findById(id).orElseThrow(() -> new EntidadNoExisteException("Turno no encontrado con ID: " + id));
+
+        LocalTime ahora = LocalTime.now().withSecond(0).withNano(0);
+        if(ahora.isBefore(turno.getHoraInicio())) {
+            throw new ReglaNegocioExcepcion("No se puede iniciar un turno antes de la hora estimada");
+        }
+        LocalTime horaMaxima = ahora.plusMinutes(10);
+        if(ahora.isAfter(horaMaxima)) {
+            marcarNoPresentado(id);
+            throw new ReglaNegocioExcepcion("No se puede iniciar despues de 10 minutos de espera");
+        }
+
         Cliente cliente = repoCliente.getReferenceById(turno.getCliente().getId());
         turno.iniciar();
         return mapearCambioEstado(turno, cliente);
@@ -213,7 +230,6 @@ public class TurnoServiceImpl implements ITurnoService {
         return mapearARespuesta(turnoNuevo);
     }
 
-    @Override
     public LocalTime encontrarHora(String idBarbero, Integer idServicio, LocalDate fechaInicio) {
         ServicioDTORespuesta servicio = catalogoServiceClient.buscarServicio(idServicio);
         int duracionTotal = 10 + servicio.getDuracion() + servicio.getPreparacion();
@@ -235,16 +251,9 @@ public class TurnoServiceImpl implements ITurnoService {
                 return horaBase;
             }
 
-            horaBase = horaBase.plusMinutes(10);
+            horaBase = horaBase.plusMinutes(20);
         }
         throw new ReglaNegocioExcepcion("El barbero " + idBarbero + "no tiene disponibilidad el dia "+fechaInicio);
-    }
-
-    @Override
-    public boolean delete(Integer id) {
-        Turno turno = turnoRepository.findById(id).orElseThrow(() -> new EntidadNoExisteException("Turno no encontrado con ID: " + id));
-        turnoRepository.delete(turno);
-        return true;
     }
 
     @Override
@@ -375,6 +384,7 @@ public class TurnoServiceImpl implements ITurnoService {
         dto.setHoraFin(t.getHoraFin());
         return dto;
     }
+
 
     public Turno mapearAPersistencia(TurnoDTOPeticion dto) {
         Turno t = new Turno();

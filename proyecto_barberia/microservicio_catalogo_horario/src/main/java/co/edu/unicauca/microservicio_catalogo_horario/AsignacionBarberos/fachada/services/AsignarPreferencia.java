@@ -81,7 +81,7 @@ public class AsignarPreferencia implements AsignarBarbero {
                 respuestas.add(respuesta);
             }
 
-            horaBaseInicio = horaBaseInicio.plusMinutes(10);
+            horaBaseInicio = horaBaseInicio.plusMinutes(20);
             if (horaBaseInicio.isAfter(horaFinJornada)) {
                 break;
             }

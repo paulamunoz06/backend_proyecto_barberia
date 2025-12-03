@@ -16,7 +16,5 @@ public interface IReservaService {
 
     ReservaDTORespuesta update(Integer id, ReservaDTORespuesta servicio);
 
-    boolean delete(Integer id);
-
     boolean cancelar(Integer id);
 }

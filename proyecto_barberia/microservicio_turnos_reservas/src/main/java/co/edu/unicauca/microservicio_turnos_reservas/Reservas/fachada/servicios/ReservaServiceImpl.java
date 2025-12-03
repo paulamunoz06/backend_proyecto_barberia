@@ -2,6 +2,7 @@ package co.edu.unicauca.microservicio_turnos_reservas.Reservas.fachada.servicios
 
 import co.edu.unicauca.microservicio_turnos_reservas.Cliente.accesoADatos.ClienteRepository;
 import co.edu.unicauca.microservicio_turnos_reservas.Cliente.modelos.Cliente;
+import co.edu.unicauca.microservicio_turnos_reservas.Email.NotificacionesCliente;
 import co.edu.unicauca.microservicio_turnos_reservas.Excepciones.excepcionesPropias.EntidadNoExisteException;
 import co.edu.unicauca.microservicio_turnos_reservas.Excepciones.excepcionesPropias.ReglaNegocioExcepcion;
 import co.edu.unicauca.microservicio_turnos_reservas.Reservas.accesoADatos.ReservaRepository;
@@ -36,6 +37,9 @@ public class ReservaServiceImpl implements IReservaService{
 
     @Autowired
     private ReservaRepository repo;
+
+    @Autowired
+    private NotificacionesCliente notificacionService;
 
     @Override
     public List<ReservaDTORespuesta> findAll() {
@@ -160,19 +164,6 @@ public class ReservaServiceImpl implements IReservaService{
 
     @Override
     @Transactional
-    public boolean delete(Integer id) {
-        Reserva reserva = repo.findById(id).orElseThrow(() -> new EntidadNoExisteException("Reserva no encontrada con ID: " + id));
-
-        if (reserva.getFechaReserva().isBefore(LocalDate.now())) {
-            throw new ReglaNegocioExcepcion("No se puede eliminar una reserva pasada");
-        }
-
-        repo.delete(reserva);
-        return true;
-    }
-
-    @Override
-    @Transactional
     public boolean cancelar(Integer id) {
         Reserva reserva = repo.findById(id).orElseThrow(() -> new EntidadNoExisteException("Reserva no encontrada con ID: " + id));
 
@@ -187,6 +178,8 @@ public class ReservaServiceImpl implements IReservaService{
         }
 
         repo.save(reserva);
+        Cliente cliente = repoCliente.getReferenceById(reserva.getCliente().getId());
+        notificacionService.notificarEliminacionReserva(cliente.getEmail(), reserva.getFechaReserva().toString());
         return true;
     }
 

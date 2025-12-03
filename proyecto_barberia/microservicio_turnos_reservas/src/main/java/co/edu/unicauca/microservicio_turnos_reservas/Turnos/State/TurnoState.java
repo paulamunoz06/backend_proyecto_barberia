@@ -11,19 +11,19 @@ public abstract class TurnoState {
     }
 
     public void iniciar() {
-        throw new IllegalStateException("No se puede iniciar el turno desde el estado actual.");
+        throw new IllegalStateException("No se puede iniciar el turno desde el estado " + turno.getEstado().toString());
     }
 
     public void completar() {
-        throw new IllegalStateException("No se puede completar el turno desde el estado actual.");
+        throw new IllegalStateException("No se puede completar el turno desde el estado " + turno.getEstado().toString());
     }
 
     public void cancelar() {
-        throw new IllegalStateException("No se puede cancelar el turno desde el estado actual.");
+        throw new IllegalStateException("No se puede cancelar el turno desde el estado " + turno.getEstado().toString());
     }
 
     public void marcarNoPresentado() {
-        throw new IllegalStateException("No se puede marcar como no presentado desde el estado actual.");
+        throw new IllegalStateException("No se puede marcar como no presentado desde el estado " + turno.getEstado().toString());
     }
 
     public abstract String getNombre();

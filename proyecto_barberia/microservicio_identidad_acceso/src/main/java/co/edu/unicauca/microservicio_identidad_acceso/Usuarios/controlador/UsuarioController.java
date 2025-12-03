@@ -6,6 +6,7 @@ import co.edu.unicauca.microservicio_identidad_acceso.Usuarios.fachada.services.
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/usuario")
@@ -15,12 +16,12 @@ public class UsuarioController {
   UsuarioServiceImpl usuarioService;
 
   @PostMapping("/barbero")
-  public ResponseEntity<?> registerBarbero(@RequestBody BarberoUsuarioDTOPeticion signUpRequest) {
-    return usuarioService.registerBarbero(signUpRequest);
+  public ResponseEntity<?> registerBarbero(@RequestBody BarberoUsuarioDTOPeticion signUpRequest, @RequestParam("archivo") MultipartFile archivo) {
+    return usuarioService.registerBarbero(signUpRequest,archivo);
   }
 
   @PostMapping("/cliente")
-  public ResponseEntity<?> registerCliente(@RequestBody ClienteUsuarioDTOPeticion signUpRequest) {
+  public ResponseEntity<?> registerCliente(@RequestBody ClienteUsuarioDTOPeticion signUpRequest, @RequestParam("archivo") MultipartFile archivo) {
     return usuarioService.registerCiente(signUpRequest);
   }
 }

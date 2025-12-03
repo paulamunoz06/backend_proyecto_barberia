@@ -2,6 +2,7 @@ package co.edu.unicauca.microservicio_turnos_reservas.Turnos.fachada.servicios;
 
 import co.edu.unicauca.microservicio_turnos_reservas.Turnos.fachada.DTOs.IncidenciaDTOPeticion;
 import co.edu.unicauca.microservicio_turnos_reservas.Turnos.fachada.DTOs.IncidenciaDTORespuesta;
+import co.edu.unicauca.microservicio_turnos_reservas.Turnos.fachada.DTOs.TipoIncidenciaDTORespuesta;
 
 import java.util.List;
 
@@ -16,4 +17,5 @@ public interface IIncidenciaService {
 
     IncidenciaDTORespuesta save(IncidenciaDTOPeticion servicio);
 
+    List<TipoIncidenciaDTORespuesta> listarTipoIncidencias();
 }
