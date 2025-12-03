@@ -27,9 +27,6 @@ public class TurnoDTORespuesta {
     @NotNull(message = "El estado es obligatorio")
     private Integer estado;
 
-    @NotNull(message = "La descripción es obligatoria")
-    private String descripcion;
-
     @NotNull(message = "La fechaInicio es obligatoria")
     private LocalDate fechaInicio;
 

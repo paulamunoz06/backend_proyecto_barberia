@@ -28,7 +28,6 @@ CREATE TABLE turno (
     servicio_id INT NOT NULL,
     barbero_id VARCHAR(20) NOT NULL,
     estado_id INT NOT NULL,
-    turno_descripcion VARCHAR(50) NOT NULL,
     turno_hora_inicio TIME NULL,
     turno_hora_fin TIME NULL,
     turno_fecha DATE NOT NULL,

@@ -166,7 +166,6 @@ public class TurnoServiceImpl implements ITurnoService {
         turnoExistente.setServicioId(turnoDTO.getServicioId());
         turnoExistente.setBarberoId(turnoDTO.getBarberoId());
         turnoExistente.setEstado(estado);
-        turnoExistente.setDescripcion(turnoDTO.getDescripcion());
         turnoExistente.setFechaInicio(turnoDTO.getFechaInicio());
         if (turnoDTO.getHoraInicio() == null) {
             turnoExistente.setHoraInicio(encontrarHora(turnoDTO.getBarberoId(),turnoDTO.getServicioId(),turnoDTO.getFechaInicio()));
@@ -384,7 +383,6 @@ public class TurnoServiceImpl implements ITurnoService {
         dto.setServicioId(t.getServicioId());
         dto.setBarberoId(t.getBarberoId());
         dto.setEstado(t.getEstado().getId());
-        dto.setDescripcion(t.getDescripcion());
         dto.setFechaInicio(t.getFechaInicio());
         dto.setHoraInicio(t.getHoraInicio());
         dto.setHoraFin(t.getHoraFin());
@@ -402,7 +400,6 @@ public class TurnoServiceImpl implements ITurnoService {
         t.setCliente(repoCliente.getReferenceById(dto.getCliente()));
         t.setServicioId(dto.getServicioId());
         t.setBarberoId(dto.getBarberoId());
-        t.setDescripcion(dto.getDescripcion());
         t.setFechaInicio(dto.getFechaInicio());
         t.setHoraInicio(dto.getHoraInicio());
         t.setHoraFin(dto.getHoraFin());

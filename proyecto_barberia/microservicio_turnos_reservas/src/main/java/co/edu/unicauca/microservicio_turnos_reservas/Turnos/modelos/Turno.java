@@ -43,9 +43,6 @@ public class Turno {
     @JoinColumn(name = "estado_id", nullable = false)
     private Estado estado;
 
-    @Column(name = "turno_descripcion", length = 50, nullable = false)
-    private String descripcion;
-
     @Column(name = "turno_fecha", nullable = false)
     private LocalDate fechaInicio;
 

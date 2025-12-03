@@ -22,9 +22,6 @@ public class TurnoDTOPeticion {
     @NotNull(message = "El barberoId es obligatorio")
     private String barberoId;
 
-    @NotNull(message = "La descripción es obligatoria")
-    private String descripcion;
-
     @NotNull(message = "La fechaInicio es obligatoria")
     private LocalDate fechaInicio;
 

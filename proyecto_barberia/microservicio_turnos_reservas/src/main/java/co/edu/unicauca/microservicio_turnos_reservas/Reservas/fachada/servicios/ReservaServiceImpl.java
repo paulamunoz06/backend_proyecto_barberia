@@ -87,7 +87,6 @@ public class ReservaServiceImpl implements IReservaService{
                 turno.setCliente(cliente);
                 turno.setServicioId(turnoDTO.getServicioId());
                 turno.setBarberoId(turnoDTO.getBarberoId());
-                turno.setDescripcion(turnoDTO.getDescripcion());
                 turno.setFechaInicio(reservaDTO.getFechaReserva());
                 turno.setHoraInicio(turnoDTO.getHoraInicio());
                 if(turnoDTO.getHoraFin() != null) {
@@ -138,7 +137,6 @@ public class ReservaServiceImpl implements IReservaService{
                 turno.setCliente(reservaExistente.getCliente());
                 turno.setServicioId(turnoDTO.getServicioId());
                 turno.setBarberoId(turnoDTO.getBarberoId());
-                turno.setDescripcion(turnoDTO.getDescripcion());
                 turno.setFechaInicio(turnoDTO.getFechaInicio());
                 turno.setHoraInicio(turnoDTO.getHoraInicio());
                 if(turnoDTO.getHoraFin() != null) {
