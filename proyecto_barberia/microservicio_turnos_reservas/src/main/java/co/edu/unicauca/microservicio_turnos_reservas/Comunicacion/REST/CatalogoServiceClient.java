@@ -1,6 +1,5 @@
 package co.edu.unicauca.microservicio_turnos_reservas.Comunicacion.REST;
 
-import co.edu.unicauca.microservicio_turnos_reservas.Cliente.fachada.DTOs.ServicioDTORespuesta;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -32,6 +31,20 @@ public class CatalogoServiceClient {
             return false;
         }
     }
+
+    public boolean cambiarEstadoBarbero(String barberoId, String estado) {
+            try {
+                webClient.get()
+                        .uri("/api/barbero//{idBarbero}/ocupacion/{ocupacionNombre}", barberoId,estado)
+                        .retrieve()
+                        .bodyToMono(Void.class)
+                        .block();
+                return true;
+            } catch (Exception e) {
+                System.err.println("Error validando barbero: " + e.getMessage());
+                return false;
+            }
+        }
 
     public boolean validarServicio(Integer servicioId) {
         try {

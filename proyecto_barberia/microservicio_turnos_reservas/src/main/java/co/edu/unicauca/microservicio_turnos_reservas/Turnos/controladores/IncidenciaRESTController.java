@@ -4,6 +4,7 @@ import co.edu.unicauca.microservicio_turnos_reservas.Turnos.fachada.DTOs.Inciden
 import co.edu.unicauca.microservicio_turnos_reservas.Turnos.fachada.DTOs.IncidenciaDTORespuesta;
 import co.edu.unicauca.microservicio_turnos_reservas.Turnos.fachada.DTOs.TipoIncidenciaDTORespuesta;
 import co.edu.unicauca.microservicio_turnos_reservas.Turnos.fachada.servicios.IIncidenciaService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -37,7 +38,7 @@ public class IncidenciaRESTController {
     }
 
     @PostMapping
-    public ResponseEntity<IncidenciaDTORespuesta> crear(@RequestBody IncidenciaDTOPeticion incidencia) {
+    public ResponseEntity<IncidenciaDTORespuesta> crear(@Valid @RequestBody IncidenciaDTOPeticion incidencia) {
         return ResponseEntity.ok(service.save(incidencia));
     }
 

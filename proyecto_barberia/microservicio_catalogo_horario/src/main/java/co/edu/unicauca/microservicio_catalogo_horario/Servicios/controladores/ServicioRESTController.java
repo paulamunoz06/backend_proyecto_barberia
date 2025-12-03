@@ -3,6 +3,7 @@ package co.edu.unicauca.microservicio_catalogo_horario.Servicios.controladores;
 import co.edu.unicauca.microservicio_catalogo_horario.Servicios.fachada.DTOs.ServicioDTOPeticion;
 import co.edu.unicauca.microservicio_catalogo_horario.Servicios.fachada.DTOs.ServicioDTORespuesta;
 import co.edu.unicauca.microservicio_catalogo_horario.Servicios.fachada.services.IServicioService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -36,12 +37,12 @@ public class ServicioRESTController {
     }
 
     @PostMapping
-    public ResponseEntity<ServicioDTORespuesta> crear(@RequestBody ServicioDTOPeticion servicio) {
+    public ResponseEntity<ServicioDTORespuesta> crear(@Valid @RequestBody ServicioDTOPeticion servicio) {
         return ResponseEntity.ok(service.save(servicio));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ServicioDTORespuesta> actualizar(@PathVariable Integer id, @RequestBody ServicioDTOPeticion servicio) {
+    public ResponseEntity<ServicioDTORespuesta> actualizar(@PathVariable Integer id, @Valid @RequestBody ServicioDTOPeticion servicio) {
         return ResponseEntity.ok(service.update(id, servicio));
     }
 

@@ -1,8 +1,7 @@
 package co.edu.unicauca.microservicio_turnos_reservas.Turnos.fachada.servicios;
 
 import co.edu.unicauca.microservicio_turnos_reservas.Cliente.accesoADatos.ClienteRepository;
-import co.edu.unicauca.microservicio_turnos_reservas.Cliente.fachada.DTOs.ServicioDTORespuesta;
-import co.edu.unicauca.microservicio_turnos_reservas.Comunicacion.PublicacionEventos.EventPublisher;
+import co.edu.unicauca.microservicio_turnos_reservas.Comunicacion.REST.ServicioDTORespuesta;
 import co.edu.unicauca.microservicio_turnos_reservas.Comunicacion.REST.CatalogoServiceClient;
 import co.edu.unicauca.microservicio_turnos_reservas.Cliente.modelos.Cliente;
 import co.edu.unicauca.microservicio_turnos_reservas.Email.NotificacionesCliente;
@@ -11,13 +10,10 @@ import co.edu.unicauca.microservicio_turnos_reservas.Excepciones.excepcionesProp
 import co.edu.unicauca.microservicio_turnos_reservas.Reservas.modelos.Reserva;
 import co.edu.unicauca.microservicio_turnos_reservas.Turnos.accesoADatos.EstadoRepository;
 import co.edu.unicauca.microservicio_turnos_reservas.Reservas.accesoADatos.ReservaRepository;
-import co.edu.unicauca.microservicio_turnos_reservas.Turnos.accesoADatos.TipoIncidenciaRepository;
 import co.edu.unicauca.microservicio_turnos_reservas.Turnos.accesoADatos.TurnoRepository;
-import co.edu.unicauca.microservicio_turnos_reservas.Turnos.fachada.DTOs.TipoIncidenciaDTORespuesta;
 import co.edu.unicauca.microservicio_turnos_reservas.Turnos.fachada.DTOs.TurnoDTOPeticion;
 import co.edu.unicauca.microservicio_turnos_reservas.Turnos.fachada.DTOs.TurnoDTORespuesta;
 import co.edu.unicauca.microservicio_turnos_reservas.Turnos.modelos.Estado;
-import co.edu.unicauca.microservicio_turnos_reservas.Turnos.modelos.TipoIncidencia;
 import co.edu.unicauca.microservicio_turnos_reservas.Turnos.modelos.Turno;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -199,6 +195,9 @@ public class TurnoServiceImpl implements ITurnoService {
 
         Cliente cliente = repoCliente.getReferenceById(turno.getCliente().getId());
         turno.iniciar();
+        if(!catalogoServiceClient.cambiarEstadoBarbero(turno.getBarberoId(),"EN_SERVICIO")){
+            throw new ReglaNegocioExcepcion("No fue posible cambiar el estado del barbero");
+        }
         return mapearCambioEstado(turno, cliente);
     }
 
@@ -207,6 +206,9 @@ public class TurnoServiceImpl implements ITurnoService {
         Turno turno = turnoRepository.findById(id).orElseThrow(() -> new EntidadNoExisteException("Turno no encontrado con ID: " + id));
         Cliente cliente = repoCliente.getReferenceById(turno.getCliente().getId());
         turno.completar();
+        if(!catalogoServiceClient.cambiarEstadoBarbero(turno.getBarberoId(),"DISPONIBLE")){
+            throw new ReglaNegocioExcepcion("No fue posible cambiar el estado del barbero");
+        }
         return mapearCambioEstado(turno, cliente);
     }
 
@@ -227,11 +229,17 @@ public class TurnoServiceImpl implements ITurnoService {
         turno.setEstado(estado);
         notificacionService.notificarCancelacionDemora(cliente.getEmail(),turno.getFechaInicio().toString(),turno.getHoraInicio().toString());
         Turno turnoNuevo = turnoRepository.save(turno);
+        if(!catalogoServiceClient.cambiarEstadoBarbero(turno.getBarberoId(),"DISPONIBLE")){
+            throw new ReglaNegocioExcepcion("No fue posible cambiar el estado del barbero");
+        }
         return mapearARespuesta(turnoNuevo);
     }
 
     public LocalTime encontrarHora(String idBarbero, Integer idServicio, LocalDate fechaInicio) {
         ServicioDTORespuesta servicio = catalogoServiceClient.buscarServicio(idServicio);
+        if(servicio == null) {
+            throw new ReglaNegocioExcepcion("El servicio no existe");
+        }
         int duracionTotal = 10 + servicio.getDuracion() + servicio.getPreparacion();
 
         final LocalTime horaFinJornada = (fechaInicio.getDayOfWeek() == DayOfWeek.SATURDAY)
@@ -338,8 +346,15 @@ public class TurnoServiceImpl implements ITurnoService {
         }
 
         // Validar fechas
-        if(turnoDTO.getFechaInicio() != null && turnoDTO.getHoraInicio() != null){
-            validarFechasTurno(turnoDTO.getFechaInicio(), turnoDTO.getHoraInicio());
+        LocalDate hoy = LocalDate.now();
+
+        if (turnoDTO.getFechaInicio().isBefore(hoy)) {
+            throw new ReglaNegocioExcepcion("No se puede crear un turno para fechas pasadas");
+        }
+        if (turnoDTO.getFechaInicio().isEqual(hoy) && turnoDTO.getHoraInicio() != null) {
+            if (turnoDTO.getHoraInicio().isBefore(LocalTime.now())) {
+                throw new ReglaNegocioExcepcion("No se puede crear un turno para horas pasadas");
+            }
         }
 
         //Validar disponibilidad
@@ -351,21 +366,12 @@ public class TurnoServiceImpl implements ITurnoService {
         }
     }
 
-    private void validarFechasTurno(LocalDate fechaInicio, LocalTime horaInicio) {
-        LocalDate hoy = LocalDate.now();
-
-        if (fechaInicio.isBefore(hoy)) {
-            throw new ReglaNegocioExcepcion("No se puede crear un turno para fechas pasadas");
-        }
-        if (fechaInicio.isEqual(hoy) && horaInicio != null) {
-            if (horaInicio.isBefore(LocalTime.now())) {
-                throw new ReglaNegocioExcepcion("No se puede crear un turno para horas pasadas");
-            }
-        }
-    }
 
     public LocalTime calcularHoraFin(LocalTime horaInicio, Integer servicioId) {
         ServicioDTORespuesta servicio = catalogoServiceClient.buscarServicio(servicioId);
+        if(servicio == null) {
+            throw new ReglaNegocioExcepcion("El servicio no existe");
+        }
         int duracionTotal = 10 + servicio.getDuracion() + servicio.getPreparacion();
         return horaInicio.plusMinutes(duracionTotal);
     }

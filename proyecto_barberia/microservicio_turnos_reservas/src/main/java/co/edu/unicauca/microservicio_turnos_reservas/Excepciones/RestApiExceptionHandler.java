@@ -9,10 +9,11 @@ import co.edu.unicauca.microservicio_turnos_reservas.Excepciones.excepcionesProp
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.util.Locale;
+import java.util.*;
 
 
 @RestControllerAdvice
@@ -66,6 +67,30 @@ public class RestApiExceptionHandler {
                         HttpStatus.NOT_FOUND.value())
                 .setUrl(req.getRequestURL().toString()).setMetodo(req.getMethod());
         return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Error> handleValidacion(
+            HttpServletRequest req,
+            MethodArgumentNotValidException ex,
+            Locale locale) {
+
+        List<String> errores = new ArrayList<>();
+
+        ex.getBindingResult().getFieldErrors().forEach(error -> {
+            errores.add(error.getDefaultMessage());
+        });
+
+        String mensaje = "Error de validación en los datos enviados";
+
+        final Error error = ErrorUtils
+                .crearError(CodigoError.ERROR_GENERICO.getCodigo(), mensaje, HttpStatus.BAD_REQUEST.value())
+                .setUrl(req.getRequestURL().toString())
+                .setMetodo(req.getMethod());
+
+        error.setMensaje(errores.toString());
+
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 
 }

@@ -35,7 +35,7 @@ CREATE TABLE servicio (
     servicio_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     categoria_id INT NOT NULL,
     administrador_id VARCHAR(20) NOT NULL,
-    servicio_descripcion VARCHAR(100) NOT NULL,
+    servicio_descripcion VARCHAR(250) NOT NULL,
     servicio_duracion INT NOT NULL,
     servicio_precio REAL NOT NULL,
     servicio_preparacion INT NOT NULL,

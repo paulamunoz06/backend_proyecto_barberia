@@ -3,6 +3,7 @@ package co.edu.unicauca.microservicio_turnos_reservas.Reservas.controladores;
 import co.edu.unicauca.microservicio_turnos_reservas.Reservas.fachada.DTOs.ReservaDTOPeticion;
 import co.edu.unicauca.microservicio_turnos_reservas.Reservas.fachada.DTOs.ReservaDTORespuesta;
 import co.edu.unicauca.microservicio_turnos_reservas.Reservas.fachada.servicios.IReservaService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,12 +27,12 @@ public class ReservaRESTController {
     }
 
     @PostMapping
-    public ResponseEntity<ReservaDTORespuesta> crear(@RequestBody ReservaDTOPeticion servicio) {
+    public ResponseEntity<ReservaDTORespuesta> crear(@Valid @RequestBody ReservaDTOPeticion servicio) {
         return ResponseEntity.ok(service.save(servicio));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ReservaDTORespuesta> actualizar(@PathVariable Integer id, @RequestBody ReservaDTORespuesta servicio) {
+    public ResponseEntity<ReservaDTORespuesta> actualizar(@PathVariable Integer id, @Valid @RequestBody ReservaDTORespuesta servicio) {
         return ResponseEntity.ok(service.update(id, servicio));
     }
 

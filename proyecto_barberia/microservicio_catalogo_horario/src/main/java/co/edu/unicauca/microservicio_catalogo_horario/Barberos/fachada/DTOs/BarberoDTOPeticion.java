@@ -1,6 +1,6 @@
 package co.edu.unicauca.microservicio_catalogo_horario.Barberos.fachada.DTOs;
 
-import co.edu.unicauca.microservicio_catalogo_horario.Barberos.modelos.EstadoUsuario;
+import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -13,22 +13,31 @@ import java.util.List;
 @ToString
 public class BarberoDTOPeticion {
 
+    @NotNull(message = "El nombre es obligatorio")
     private String nombre;
 
+    @NotNull(message = "El ID del barbero es obligatorio")
     private String id;
 
+    @NotNull(message = "La fecha de nacimiento es obligatoria")
     private LocalDate nacimiento;
 
+    @NotEmpty(message = "Debe registrar al menos un servicio")
     private List<Integer> servicios;
 
+    @NotNull(message = "El estado es obligatorio")
     private String estado;
 
+    @NotNull(message = "El teléfono es obligatorio")
+    @Positive(message = "El teléfono debe ser un número válido")
     private Long telefono;
 
+    @NotNull(message = "El email es obligatorio")
+    @Email(message = "El email no tiene un formato válido")
     private String email;
 
     private String fotografia;
 
+    @NotNull(message = "El idAdministrador es obligatorio")
     private String idAdministrador;
-
 }

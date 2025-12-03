@@ -10,4 +10,5 @@ import lombok.Setter;
 public class LoginDTORespuesta {
   private String token;
   private String username;
+  private String rol;
 }

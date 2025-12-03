@@ -3,6 +3,7 @@ package co.edu.unicauca.microservicio_catalogo_horario.Barberos.controladores;
 import co.edu.unicauca.microservicio_catalogo_horario.Barberos.fachada.DTOs.BarberoDTOPeticion;
 import co.edu.unicauca.microservicio_catalogo_horario.Barberos.fachada.DTOs.BarberoDTORespuesta;
 import co.edu.unicauca.microservicio_catalogo_horario.Barberos.fachada.services.IBarberoService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -41,12 +42,12 @@ public class BarberoRESTController {
     }
 
     @PostMapping
-    public ResponseEntity<BarberoDTORespuesta> crear(@RequestBody BarberoDTOPeticion barbero) {
+    public ResponseEntity<BarberoDTORespuesta> crear(@Valid @RequestBody BarberoDTOPeticion barbero) {
         return ResponseEntity.ok(service.save(barbero));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<BarberoDTORespuesta> actualizar(@PathVariable String id, @RequestBody BarberoDTOPeticion barbero) {
+    public ResponseEntity<BarberoDTORespuesta> actualizar(@PathVariable String id, @Valid @RequestBody BarberoDTOPeticion barbero) {
         return ResponseEntity.ok(service.update(id, barbero));
     }
 

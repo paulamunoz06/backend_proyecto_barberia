@@ -16,8 +16,11 @@ services:
       SPRING_RABBITMQ_USERNAME: admin
       SPRING_RABBITMQ_PASSWORD: admin
       SERVER_PORT: 8080
+      FILE_UPLOAD_DIR: /uploads
     ports:
       - "8080:8080"
+    volumes:
+      - ./microservicio_identidad_acceso/uploads:/uploads
 
   # ----------------------------
   # Base de datos PostgreSQL
@@ -117,9 +120,15 @@ services:
       SPRING_RABBITMQ_USERNAME: admin
       SPRING_RABBITMQ_PASSWORD: admin
 
+      FILE_UPLOAD_DIR: /uploads
+      APP_BASE_URL: http://localhost:8080
+      APP_UPLOAD_MAX_SIZE: 10MB
+
       SERVER_PORT: 5001
     ports:
       - "5001:5001"
+    volumes:
+      - ./microservicio_identidad_acceso/uploads:/uploads
 
   # ----------------------------
   # Microservicio catálogo horario

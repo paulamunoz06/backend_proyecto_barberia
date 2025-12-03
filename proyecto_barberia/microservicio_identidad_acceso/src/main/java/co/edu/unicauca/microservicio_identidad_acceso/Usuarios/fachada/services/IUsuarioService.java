@@ -7,5 +7,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface IUsuarioService {
    ResponseEntity<?> registerBarbero(BarberoUsuarioDTOPeticion signUpRequest, MultipartFile archivo);
+   ResponseEntity<?> actualizarFotoBarbero(String id, MultipartFile archivo);
+   ResponseEntity<?> eliminarFotoBarbero(String idBarbero);
+   ResponseEntity<?> visualizarFotoBarbero(String nombre);
    ResponseEntity<?> registerCiente(ClienteUsuarioDTOPeticion signUpRequest);
 }

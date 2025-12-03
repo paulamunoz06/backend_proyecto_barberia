@@ -1,4 +1,4 @@
-package co.edu.unicauca.microservicio_turnos_reservas.Cliente.fachada.DTOs;
+package co.edu.unicauca.microservicio_turnos_reservas.Comunicacion.REST;
 
 import lombok.Getter;
 import lombok.Setter;

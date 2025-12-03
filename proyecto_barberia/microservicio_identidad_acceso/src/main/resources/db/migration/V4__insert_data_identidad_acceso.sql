@@ -70,6 +70,9 @@ INSERT INTO microservicio_permissions (microservice_name, endpoint_pattern, http
 
 INSERT INTO microservicio_permissions (microservice_name, endpoint_pattern, http_method, required_roles, description) VALUES
 ('identidad-acceso', '/api/usuario/barbero', 'POST', 'ADMINISTRADOR', 'Crear un barbero y usuario'),
+('identidad-acceso', '/api/usuario/barbero/*/foto', 'PUT', 'ADMINISTRADOR', 'Actualizar la imagen de un barbero'),
+('identidad-acceso', '/api/usuario/barbero/*/foto', 'DELETE', 'ADMINISTRADOR', 'Eliminar la imagen de un barbero'),
+('identidad-acceso', '/api/usuario/barbero/foto/*', 'GET', 'CLIENTE,BARBERO,ADMINISTRADOR', 'Visualizar imagen'),
 ('identidad-acceso', '/api/usuario/cliente', 'POST', 'ADMINISTRADOR', 'Crear un cliente y usuario');
 
 INSERT INTO microservicio_permissions (microservice_name, endpoint_pattern, http_method, required_roles, description) VALUES
@@ -100,9 +103,9 @@ INSERT INTO microservicio_permissions (microservice_name, endpoint_pattern, http
 ('reserva-service', '/api/turno/*', 'GET', 'CLIENTE,BARBERO,ADMINISTRADOR', 'Buscar turno por ID'),
 ('reserva-service', '/api/turno', 'POST', 'CLIENTE,BARBERO,ADMINISTRADOR', 'Crear un nuevo turno'),
 ('reserva-service', '/api/turno/*', 'PUT', 'CLIENTE,BARBERO,ADMINISTRADOR', 'Actualizar un turno existente'),
-('reserva-service', '/api/turno/iniciar/*', 'PUT', 'CLIENTE,BARBERO,ADMINISTRADOR', 'Inciar un turno'),
-('reserva-service', '/api/turno/completar/*', 'PUT', 'CLIENTE,BARBERO,ADMINISTRADOR', 'Completar un turno'),
-('reserva-service', '/api/turno/cancelar/*', 'PUT', 'CLIENTE,BARBERO,ADMINISTRADOR', 'Cancelar un turno'),
-('reserva-service', '/api/turno/noPresentado/*', 'PUT', 'CLIENTE,BARBERO,ADMINISTRADOR', 'Cliente no presentado'),
+('reserva-service', '/api/turno/iniciar/*', 'PUT', 'BARBERO,ADMINISTRADOR', 'Inciar un turno'),
+('reserva-service', '/api/turno/completar/*', 'PUT', 'BARBERO,ADMINISTRADOR', 'Completar un turno'),
+('reserva-service', '/api/turno/cancelar/*', 'PUT', 'CLIENTE,ADMINISTRADOR', 'Cancelar un turno'),
+('reserva-service', '/api/turno/noPresentado/*', 'PUT', 'BARBERO,ADMINISTRADOR', 'Cliente no presentado'),
 ('reserva-service', '/api/turno/*', 'DELETE', 'CLIENTE,BARBERO,ADMINISTRADOR', 'Eliminar un turno por ID'),
 ('reserva-service', '/api/turno/barbero/*/disponibilidad', 'GET', 'BARBERO,ADMINISTRADOR', 'Verificar la disponibilidad de un barbero respecto a sus turnos');

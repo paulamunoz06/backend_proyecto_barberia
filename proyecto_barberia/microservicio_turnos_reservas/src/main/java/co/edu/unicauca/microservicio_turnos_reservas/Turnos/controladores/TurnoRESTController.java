@@ -4,6 +4,7 @@ import co.edu.unicauca.microservicio_turnos_reservas.Turnos.fachada.DTOs.TipoInc
 import co.edu.unicauca.microservicio_turnos_reservas.Turnos.fachada.DTOs.TurnoDTOPeticion;
 import co.edu.unicauca.microservicio_turnos_reservas.Turnos.fachada.DTOs.TurnoDTORespuesta;
 import co.edu.unicauca.microservicio_turnos_reservas.Turnos.fachada.servicios.ITurnoService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -56,12 +57,12 @@ public class TurnoRESTController {
     }
 
     @PostMapping
-    public ResponseEntity<TurnoDTORespuesta> crear(@RequestBody TurnoDTOPeticion servicio) {
+    public ResponseEntity<TurnoDTORespuesta> crear(@Valid @RequestBody TurnoDTOPeticion servicio) {
         return ResponseEntity.ok(service.save(servicio));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<TurnoDTORespuesta> actualizar(@PathVariable Integer id, @RequestBody TurnoDTORespuesta servicio) {
+    public ResponseEntity<TurnoDTORespuesta> actualizar(@PathVariable Integer id, @Valid @RequestBody TurnoDTORespuesta servicio) {
         return ResponseEntity.ok(service.update(id, servicio));
     }
 

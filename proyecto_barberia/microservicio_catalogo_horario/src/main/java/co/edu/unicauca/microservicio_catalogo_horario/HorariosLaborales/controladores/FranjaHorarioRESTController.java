@@ -6,6 +6,7 @@ import co.edu.unicauca.microservicio_catalogo_horario.Barberos.fachada.services.
 import co.edu.unicauca.microservicio_catalogo_horario.HorariosLaborales.fachada.DTOs.FranjaHorarioDTOPeticion;
 import co.edu.unicauca.microservicio_catalogo_horario.HorariosLaborales.fachada.DTOs.FranjaHorarioDTORespuesta;
 import co.edu.unicauca.microservicio_catalogo_horario.HorariosLaborales.fachada.services.IFranjaHorarioService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -52,12 +53,12 @@ public class FranjaHorarioRESTController {
     }
 
     @PostMapping
-    public ResponseEntity<FranjaHorarioDTORespuesta> crear(@RequestBody FranjaHorarioDTOPeticion franja) {
+    public ResponseEntity<FranjaHorarioDTORespuesta> crear(@Valid @RequestBody FranjaHorarioDTOPeticion franja) {
         return ResponseEntity.ok(service.save(franja));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<FranjaHorarioDTORespuesta> actualizar(@PathVariable Integer id, @RequestBody FranjaHorarioDTORespuesta franja) {
+    public ResponseEntity<FranjaHorarioDTORespuesta> actualizar(@PathVariable Integer id, @Valid @RequestBody FranjaHorarioDTORespuesta franja) {
         return ResponseEntity.ok(service.update(id,franja));
     }
 

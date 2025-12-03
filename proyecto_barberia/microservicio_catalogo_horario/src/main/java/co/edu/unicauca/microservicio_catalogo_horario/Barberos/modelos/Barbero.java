@@ -45,7 +45,7 @@ public class Barbero {
     @Column(name = "barbero_nacimiento", nullable = false)
     private LocalDate nacimiento;
 
-    @Column(name = "barbero_fotografia")
+    @Column(name = "barbero_fotografia", nullable = true)
     private String fotografia;
 
     @ManyToMany(fetch = FetchType.LAZY)

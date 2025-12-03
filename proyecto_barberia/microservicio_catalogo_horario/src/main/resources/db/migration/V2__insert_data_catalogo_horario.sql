@@ -17,12 +17,12 @@ VALUES
 
 INSERT INTO barbero (barbero_id, administrador_id, ocupacion_id, barbero_nombre, barbero_email, barbero_telefono, barbero_estado, barbero_nacimiento, barbero_fotografia)
 VALUES
-    ('2','1',1,'Carlos Sánchez','jumaco59@gmail.com',3001234567,'ACTIVO','1990-05-10',NULL),
-    ('3','1',1,'Ana López','jumaco59@gmail.com',3009876543,'ACTIVO','1992-08-20',NULL),
-    ('4','1',1,'Luis Herrera','jumaco59@gmail.com',3001112222,'ACTIVO','1989-04-15',NULL),
-    ('5','1',1,'Marcos Díaz','jumaco59@gmail.com',3002223333,'ACTIVO','1991-11-07',NULL),
-    ('6','1',1,'Felipe Rojas','jumaco59@gmail.com',3003334444,'ACTIVO','1995-02-19',NULL),
-    ('7','1',1,'David Molina','jumaco59@gmail.com',3004445555,'ACTIVO','1993-07-12',NULL),
+    ('2','1',1,'Carlos Sánchez','jumaco59@gmail.com',3001234567,'ACTIVO','1990-05-10','da930d7d-3d6e-4122-8295-f223ecb94cef_barbero2'),
+    ('3','1',1,'Ana López','jumaco59@gmail.com',3009876543,'ACTIVO','1992-08-20','f9dbd400-122e-4c29-9d8a-30c8bdff7746_barbero3.jpg'),
+    ('4','1',1,'Luis Herrera','jumaco59@gmail.com',3001112222,'ACTIVO','1989-04-15','dfb2efb0-7af5-4add-8532-15351d70c9ce_barbero4.jpg'),
+    ('5','1',1,'Marcos Díaz','jumaco59@gmail.com',3002223333,'ACTIVO','1991-11-07','b79d10cc-5404-4887-a9dc-34c3fa2d6322_barbero5.jpg'),
+    ('6','1',1,'Felipe Rojas','jumaco59@gmail.com',3003334444,'ACTIVO','1995-02-19','d5f956ef-a35a-4c3a-b1af-36a9f9910db6_barbero6.jpg'),
+    ('7','1',1,'David Molina','jumaco59@gmail.com',3004445555,'ACTIVO','1993-07-12','d5f956ef-a35a-4c3a-b1af-36a9f9910db6_barbero6.jpg'),
     ('8','1',1,'Esteban Silva','jumaco59@gmail.com',3005556666,'ACTIVO','1988-09-03',NULL),
     ('9','1',1,'Kevin Torres','jumaco59@gmail.com',3006667777,'ACTIVO','1996-01-25',NULL),
     ('10','1',1,'Oscar Mejía','jumaco59@gmail.com',3007778888,'ACTIVO','1994-03-17',NULL),

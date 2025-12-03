@@ -6,6 +6,7 @@ import co.edu.unicauca.microservicio_catalogo_horario.HorariosLaborales.fachada.
 import co.edu.unicauca.microservicio_catalogo_horario.HorariosLaborales.fachada.DTOs.HorarioLaboralDiarioDTORespuesta;
 import co.edu.unicauca.microservicio_catalogo_horario.HorariosLaborales.fachada.services.IFranjaHorarioService;
 import co.edu.unicauca.microservicio_catalogo_horario.HorariosLaborales.fachada.services.IHorarioLaboralDiarioService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -30,12 +31,12 @@ public class HorarioLaboralRESTController {
     }
 
     @PostMapping
-    public HorarioLaboralDiarioDTORespuesta crear(@RequestBody HorarioLaboralDiarioDTOPeticion horario) {
+    public HorarioLaboralDiarioDTORespuesta crear(@Valid  @RequestBody HorarioLaboralDiarioDTOPeticion horario) {
         return service.save(horario);
     }
 
     @PutMapping("/{id}")
-    public HorarioLaboralDiarioDTORespuesta actualizar(@PathVariable LocalDate id, @RequestBody HorarioLaboralDiarioDTOPeticion horario) {
+    public HorarioLaboralDiarioDTORespuesta actualizar(@PathVariable LocalDate id, @Valid @RequestBody HorarioLaboralDiarioDTOPeticion horario) {
         return service.update(id,horario);
     }
 }
