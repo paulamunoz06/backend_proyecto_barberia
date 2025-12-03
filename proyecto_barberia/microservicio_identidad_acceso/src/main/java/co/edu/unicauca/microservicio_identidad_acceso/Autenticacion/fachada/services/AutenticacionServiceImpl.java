@@ -47,7 +47,7 @@ public class AutenticacionServiceImpl implements IAutenticacionService {
 
             UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 
-            return new LoginDTORespuesta(jwt, userDetails.getUsername(), userDetails.getAuthorities().toString());
+            return new LoginDTORespuesta(jwt, userDetails.getUsername(), userDetails.getAuthorities().stream().toList().get(0).getAuthority());
         } catch (BadCredentialsException ex) {
             throw new BadCredentialException("Credenciales inválidas: usuario o contraseña incorrectos.");
         } catch (Exception ex) {
