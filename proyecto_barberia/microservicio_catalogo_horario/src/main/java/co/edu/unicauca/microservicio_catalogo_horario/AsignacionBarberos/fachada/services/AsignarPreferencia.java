@@ -47,7 +47,7 @@ public class AsignarPreferencia implements AsignarBarbero {
 
         while (!horaBaseInicio.isAfter(horaFinJornada)) {
             BarberoFranjaDTORespuesta respuesta = new BarberoFranjaDTORespuesta();
-            respuesta.setBarberoIds(new ArrayList<>());
+            respuesta.setServicioBarbero(new TreeMap<>());
             respuesta.setFranjas(new TreeMap<>());
 
             LocalTime horaInicio = horaBaseInicio;
@@ -71,7 +71,7 @@ public class AsignarPreferencia implements AsignarBarbero {
                 int duracionTotal = 10 + servicio.getDuracion() + servicio.getPreparacion();
                 LocalTime horaFin = horaInicio.plusMinutes(duracionTotal);
 
-                respuesta.getBarberoIds().add(barberoElegido.getId());
+                respuesta.getServicioBarbero().put(servicioId,barberoElegido.getId());
                 respuesta.getFranjas().put(horaInicio,horaFin);
 
                 horaInicio = horaFin;

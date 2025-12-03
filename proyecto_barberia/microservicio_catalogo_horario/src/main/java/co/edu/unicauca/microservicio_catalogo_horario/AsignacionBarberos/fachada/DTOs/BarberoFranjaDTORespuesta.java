@@ -10,6 +10,6 @@ import java.util.Map;
 @Getter
 @Setter
 public class BarberoFranjaDTORespuesta {
-    private List<String> barberoIds;
+    private Map<Integer,String> servicioBarbero;
     private Map<LocalTime, LocalTime> franjas;
 }
